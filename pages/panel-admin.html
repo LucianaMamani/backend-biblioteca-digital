@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Panel administración — BiblioDigital</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="../css/base.css"/>
+  <style>
+    .adm-layout { display: grid; grid-template-columns: 220px 1fr; min-height: calc(100vh - 4.5rem); }
+
+    .adm-sidebar {
+      background: var(--bg-card); border-right: 1px solid var(--border);
+      padding: 1.75rem 0; position: sticky; top: 4.5rem;
+      height: calc(100vh - 4.5rem); overflow-y: auto;
+    }
+    .adm-sidebar-title {
+      font-size: .65rem; letter-spacing: .18em; text-transform: uppercase;
+      color: var(--muted); padding: 0 1.25rem; margin-bottom: .5rem;
+    }
+    .adm-link {
+      display: flex; align-items: center; gap: .6rem;
+      padding: .55rem 1.25rem; font-size: .84rem; color: var(--muted);
+      cursor: pointer; transition: all .15s; border: none; background: none;
+      width: 100%; text-align: left;
+    }
+    .adm-link:hover { background: var(--bg-card2); color: var(--cream); }
+    .adm-link.active { background: rgba(201,168,76,.1); color: var(--gold); }
+    .adm-link-icon { font-size: .95rem; width: 18px; text-align: center; }
+
+    .adm-main { padding: 2.5rem; }
+    .adm-page { display: none; }
+    .adm-page.active { display: block; }
+
+    .page-top {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;
+    }
+    .page-top h1 { font-size: 1.6rem; }
+
+    .stat-row {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(130px,1fr));
+      gap: 1rem; margin-bottom: 2.5rem;
+    }
+    .stat-card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 4px; padding: 1.1rem 1.25rem;
+    }
+    .stat-num { font-family: var(--font-head); font-size: 1.8rem; color: var(--gold); }
+    .stat-lbl { font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+
+    .table-toolbar {
+      display: flex; align-items: center; gap: .75rem; margin-bottom: 1.25rem; flex-wrap: wrap;
+    }
+    .tbl-search {
+      flex: 1; min-width: 180px; padding: .55rem .9rem;
+      background: var(--bg-card2); border: 1px solid var(--border); border-radius: 2px;
+      color: var(--cream); font-family: var(--font-body); font-size: .84rem; outline: none;
+    }
+    .tbl-search:focus { border-color: var(--gold-dim); }
+    .tbl-search::placeholder { color: var(--muted); }
+
+    .action-btn {
+      background: none; border: none; cursor: pointer;
+      font-size: .78rem; letter-spacing: .06em; text-transform: uppercase;
+      padding: .3rem .7rem; border-radius: 2px; transition: all .15s;
+    }
+    .action-edit { color: var(--gold-dim); border: 1px solid rgba(138,110,47,.3); }
+    .action-edit:hover { color: var(--gold); border-color: var(--gold-dim); }
+    .action-del  { color: #c07070; border: 1px solid rgba(192,112,112,.25); }
+    .action-del:hover { color: #e07070; border-color: #a05050; }
+
+    .modal-backdrop {
+      position: fixed; inset: 0; background: rgba(0,0,0,.8);
+      z-index: 300; display: none; align-items: center; justify-content: center; padding: 1.5rem;
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal-box {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 4px; width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto;
+    }
+    .modal-hdr {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border);
+    }
+    .modal-hdr h2 { font-size: 1.1rem; }
+    .modal-close { background: none; border: none; color: var(--muted); font-size: 1.3rem; cursor: pointer; }
+    .modal-close:hover { color: var(--cream); }
+    .modal-body { padding: 1.5rem; }
+    .modal-footer {
+      padding: 1rem 1.5rem; border-top: 1px solid var(--border);
+      display: flex; justify-content: flex-end; gap: .75rem;
+    }
+
+    @media(max-width:768px){
+      .adm-layout { grid-template-columns: 1fr; }
+      .adm-sidebar { display: none; }
+      .adm-main { padding: 1.5rem 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar" id="main-nav"></nav>
+
+  <div class="page-content">
+    <div class="adm-layout">
+
+      <!-- SIDEBAR -->
+      <div class="adm-sidebar">
+        <p class="adm-sidebar-title" style="margin-bottom:1rem;">Panel admin</p>
+        <button class="adm-link active" onclick="showPage('dashboard',this)"><span class="adm-link-icon">📊</span>Dashboard</button>
+        <button class="adm-link" onclick="showPage('libros',this)"><span class="adm-link-icon">📚</span>Libros</button>
+        <button class="adm-link" onclick="showPage('autores',this)"><span class="adm-link-icon">✍️</span>Autores</button>
+        <button class="adm-link" onclick="showPage('generos',this)"><span class="adm-link-icon">🏷️</span>Géneros</button>
+        <button class="adm-link" onclick="showPage('reservas',this)"><span class="adm-link-icon">🗓️</span>Reservas</button>
+        <button class="adm-link" onclick="showPage('usuarios',this)"><span class="adm-link-icon">👥</span>Usuarios</button>
+        <hr class="divider" style="margin:1rem 0;"/>
+        <button class="adm-link" onclick="Auth.logout()"><span class="adm-link-icon">🚪</span>Cerrar sesión</button>
+      </div>
+
+      <!-- MAIN -->
+      <div class="adm-main">
+
+        <!-- DASHBOARD -->
+        <div class="adm-page active" id="page-dashboard">
+          <div class="page-top"><h1>Dashboard</h1></div>
+          <div class="stat-row" id="dash-stats"></div>
+          <h2 style="font-size:1rem;margin-bottom:1rem;">Reservas recientes</h2>
+          <div class="table-wrap">
+            <table id="dash-reservas-table"></table>
+          </div>
+        </div>
+
+        <!-- LIBROS -->
+        <div class="adm-page" id="page-libros">
+          <div class="page-top">
+            <h1>Libros</h1>
+            <button class="btn btn-primary btn-sm" onclick="openModal('libro')">+ Agregar libro</button>
+          </div>
+          <div class="table-toolbar">
+            <input class="tbl-search" type="text" placeholder="Buscar libro…" oninput="filterTable(this,'libros-table')"/>
+          </div>
+          <div class="table-wrap"><table id="libros-table"></table></div>
+        </div>
+
+        <!-- AUTORES -->
+        <div class="adm-page" id="page-autores">
+          <div class="page-top">
+            <h1>Autores</h1>
+            <button class="btn btn-primary btn-sm" onclick="openModal('autor')">+ Agregar autor</button>
+          </div>
+          <div class="table-toolbar">
+            <input class="tbl-search" type="text" placeholder="Buscar autor…" oninput="filterTable(this,'autores-table')"/>
+          </div>
+          <div class="table-wrap"><table id="autores-table"></table></div>
+        </div>
+
+        <!-- GENEROS -->
+        <div class="adm-page" id="page-generos">
+          <div class="page-top">
+            <h1>Géneros</h1>
+            <button class="btn btn-primary btn-sm" onclick="openModal('genero')">+ Agregar género</button>
+          </div>
+          <div class="table-wrap"><table id="generos-table"></table></div>
+        </div>
+
+        <!-- RESERVAS -->
+        <div class="adm-page" id="page-reservas">
+          <div class="page-top"><h1>Reservas</h1></div>
+          <div class="table-toolbar">
+            <input class="tbl-search" type="text" placeholder="Buscar reserva…" oninput="filterTable(this,'reservas-table')"/>
+          </div>
+          <div class="table-wrap"><table id="reservas-table"></table></div>
+        </div>
+
+        <!-- USUARIOS -->
+        <div class="adm-page" id="page-usuarios">
+          <div class="page-top"><h1>Usuarios</h1></div>
+          <div class="table-wrap"><table id="usuarios-table"></table></div>
+        </div>
+
+      </div><!-- /adm-main -->
+    </div>
+  </div>
+
+  <!-- MODAL -->
+  <div class="modal-backdrop" id="modal">
+    <div class="modal-box">
+      <div class="modal-hdr">
+        <h2 id="modal-title">Formulario</h2>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
+      <div class="modal-body" id="modal-body"></div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost btn-sm" onclick="closeModal()">Cancelar</button>
+        <button class="btn btn-primary btn-sm" onclick="saveForm()">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/data.js"></script>
+  <script src="../js/utils.js"></script>
+  <script>
+    renderNav();
+    const user = Auth.getUser();
+    if (!user || user.role !== 'admin') window.location.href = 'login.html';
+
+    let currentModal = null;
+
+    // ── PAGE SWITCHING ──
+    function showPage(id, btn) {
+      document.querySelectorAll('.adm-page').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.adm-link').forEach(b => b.classList.remove('active'));
+      document.getElementById('page-' + id).classList.add('active');
+      btn.classList.add('active');
+      renderPage(id);
+    }
+
+    function renderPage(id) {
+      if (id === 'dashboard') renderDashboard();
+      if (id === 'libros')    renderLibros();
+      if (id === 'autores')   renderAutores();
+      if (id === 'generos')   renderGeneros();
+      if (id === 'reservas')  renderReservas();
+      if (id === 'usuarios')  renderUsuarios();
+    }
+
+    // ── FILTER ──
+    function filterTable(input, tableId) {
+      const q = input.value.toLowerCase();
+      document.querySelectorAll(`#${tableId} tbody tr`).forEach(tr => {
+        tr.style.display = tr.textContent.toLowerCase().includes(q) ? '' : 'none';
+      });
+    }
+
+    // ── DASHBOARD ──
+    function renderDashboard() {
+      const avail = DB.books.filter(b => b.disponible).length;
+      document.getElementById('dash-stats').innerHTML = `
+        <div class="stat-card"><p class="stat-num">${DB.books.length}</p><p class="stat-lbl">Libros</p></div>
+        <div class="stat-card"><p class="stat-num">${avail}</p><p class="stat-lbl">Disponibles</p></div>
+        <div class="stat-card"><p class="stat-num">${DB.reservations.length}</p><p class="stat-lbl">Reservas</p></div>
+        <div class="stat-card"><p class="stat-num">${DB.users.length}</p><p class="stat-lbl">Usuarios</p></div>`;
+
+      const rows = DB.reservations.slice(-5).reverse().map(r => {
+        const b = DB.getBook(r.book_id);
+        const u = DB.getUser(r.user_id);
+        return `<tr>
+          <td>${b ? b.titulo : '—'}</td>
+          <td>${u ? u.nombre : '—'}</td>
+          <td>${formatDate(r.fecha_reserva)}</td>
+          <td><span class="badge ${r.estado === 'activa' ? 'badge-available' : 'badge-reserved'}">${r.estado}</span></td>
+        </tr>`;
+      }).join('');
+
+      document.getElementById('dash-reservas-table').innerHTML = `
+        <thead><tr><th>Libro</th><th>Usuario</th><th>Fecha</th><th>Estado</th></tr></thead>
+        <tbody>${rows}</tbody>`;
+    }
+
+    // ── LIBROS ──
+    function renderLibros() {
+      const rows = DB.books.map(b => {
+        const a = DB.getAuthor(b.autor_id);
+        const g = DB.getGenre(b.genero_id);
+        return `<tr>
+          <td>${b.portada} ${b.titulo}</td>
+          <td>${a ? a.nombre : '—'}</td>
+          <td>${g ? g.nombre : '—'}</td>
+          <td>${b.anio}</td>
+          <td><span class="badge ${b.disponible ? 'badge-available' : 'badge-reserved'}">${b.disponible ? 'Disponible' : 'Reservado'}</span></td>
+          <td>
+            <button class="action-btn action-edit" onclick="openModal('libro',${b.id})">Editar</button>
+            <button class="action-btn action-del"  onclick="deleteItem('libro',${b.id})">Eliminar</button>
+          </td>
+        </tr>`;
+      }).join('');
+
+      document.getElementById('libros-table').innerHTML = `
+        <thead><tr><th>Título</th><th>Autor</th><th>Género</th><th>Año</th><th>Estado</th><th>Acciones</th></tr></thead>
+        <tbody>${rows}</tbody>`;
+    }
+
+    // ── AUTORES ──
+    function renderAutores() {
+      const rows = DB.authors.map(a => `
+        <tr>
+          <td>${a.nombre}</td>
+          <td>${a.nacionalidad}</td>
+          <td>${DB.books.filter(b => b.autor_id === a.id).length} libros</td>
+          <td>
+            <button class="action-btn action-edit" onclick="openModal('autor',${a.id})">Editar</button>
+            <button class="action-btn action-del"  onclick="deleteItem('autor',${a.id})">Eliminar</button>
+          </td>
+        </tr>`).join('');
+
+      document.getElementById('autores-table').innerHTML = `
+        <thead><tr><th>Nombre</th><th>Nacionalidad</th><th>Libros</th><th>Acciones</th></tr></thead>
+        <tbody>${rows}</tbody>`;
+    }
+
+    // ── GENEROS ──
+    function renderGeneros() {
+      const rows = DB.genres.map(g => `
+        <tr>
+          <td>${g.nombre}</td>
+          <td>${DB.books.filter(b => b.genero_id === g.id).length} libros</td>
+          <td>
+            <button class="action-btn action-edit" onclick="openModal('genero',${g.id})">Editar</button>
+            <button class="action-btn action-del"  onclick="deleteItem('genero',${g.id})">Eliminar</button>
+          </td>
+        </tr>`).join('');
+
+      document.getElementById('generos-table').innerHTML = `
+        <thead><tr><th>Nombre</th><th>Libros</th><th>Acciones</th></tr></thead>
+        <tbody>${rows}</tbody>`;
+    }
+
+    // ── RESERVAS ──
+    function renderReservas() {
+      const rows = DB.reservations.map(r => {
+        const b = DB.getBook(r.book_id);
+        const u = DB.getUser(r.user_id);
+        return `<tr>
+          <td>${b ? b.titulo : '—'}</td>
+          <td>${u ? u.nombre : '—'}</td>
+          <td>${formatDate(r.fecha_reserva)}</td>
+          <td>${formatDate(r.fecha_devolucion)}</td>
+          <td><span class="badge ${r.estado === 'activa' ? 'badge-available' : 'badge-reserved'}">${r.estado}</span></td>
+          <td><button class="action-btn action-del" onclick="deleteItem('reserva',${r.id})">Cancelar</button></td>
+        </tr>`;
+      }).join('');
+
+      document.getElementById('reservas-table').innerHTML = `
+        <thead><tr><th>Libro</th><th>Usuario</th><th>Reserva</th><th>Devolución</th><th>Estado</th><th></th></tr></thead>
+        <tbody>${rows}</tbody>`;
+    }
+
+    // ── USUARIOS ──
+    function renderUsuarios() {
+      const rows = DB.users.map(u => `
+        <tr>
+          <td>${u.nombre}</td>
+          <td>${u.email}</td>
+          <td><span class="badge ${u.role === 'admin' ? 'badge-admin' : 'badge-user'}">${u.role}</span></td>
+          <td>${DB.reservations.filter(r => r.user_id === u.id).length} reservas</td>
+          <td><button class="action-btn action-del" onclick="deleteItem('usuario',${u.id})">Eliminar</button></td>
+        </tr>`).join('');
+
+      document.getElementById('usuarios-table').innerHTML = `
+        <thead><tr><th>Nombre</th><th>Email</th><th>Rol</th><th>Actividad</th><th></th></tr></thead>
+        <tbody>${rows}</tbody>`;
+    }
+
+    // ── MODAL FORMS ──
+    function openModal(type, id = null) {
+      currentModal = { type, id };
+      const map = { libro: 'Libro', autor: 'Autor', genero: 'Género' };
+      document.getElementById('modal-title').textContent = (id ? 'Editar ' : 'Agregar ') + (map[type] || type);
+
+      let html = '';
+
+      if (type === 'libro') {
+        const b = id ? DB.getBook(id) : {};
+        const authorOpts = DB.authors.map(a =>
+          `<option value="${a.id}" ${b.autor_id === a.id ? 'selected' : ''}>${a.nombre}</option>`
+        ).join('');
+        const genreOpts = DB.genres.map(g =>
+          `<option value="${g.id}" ${b.genero_id === g.id ? 'selected' : ''}>${g.nombre}</option>`
+        ).join('');
+        html = `
+          <div class="form-group">
+            <label class="form-label">Título</label>
+            <input class="form-input" id="f-titulo" value="${b.titulo || ''}"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Autor</label>
+            <select class="form-select" id="f-autor">${authorOpts}</select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Género</label>
+            <select class="form-select" id="f-genero">${genreOpts}</select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Año</label>
+            <input class="form-input" id="f-anio" type="number" value="${b.anio || ''}"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">ISBN</label>
+            <input class="form-input" id="f-isbn" value="${b.isbn || ''}"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Descripción</label>
+            <textarea class="form-textarea" id="f-desc">${b.descripcion || ''}</textarea>
+          </div>`;
+
+      } else if (type === 'autor') {
+        const a = id ? DB.getAuthor(id) : {};
+        html = `
+          <div class="form-group">
+            <label class="form-label">Nombre</label>
+            <input class="form-input" id="f-nombre" value="${a.nombre || ''}"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Nacionalidad</label>
+            <input class="form-input" id="f-nac" value="${a.nacionalidad || ''}"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Biografía</label>
+            <textarea class="form-textarea" id="f-bio">${a.bio || ''}</textarea>
+          </div>`;
+
+      } else if (type === 'genero') {
+        const g = id ? DB.getGenre(id) : {};
+        html = `
+          <div class="form-group">
+            <label class="form-label">Nombre del género</label>
+            <input class="form-input" id="f-gnombre" value="${g.nombre || ''}"/>
+          </div>`;
+      }
+
+      document.getElementById('modal-body').innerHTML = html;
+      document.getElementById('modal').classList.add('open');
+    }
+
+    function closeModal() {
+      document.getElementById('modal').classList.remove('open');
+      currentModal = null;
+    }
+
+    function saveForm() {
+      if (!currentModal) return;
+      const { type, id } = currentModal;
+
+      if (type === 'libro') {
+        const titulo = document.getElementById('f-titulo').value.trim();
+        if (!titulo) { showToast('El título es requerido', 'error'); return; }
+        if (id) {
+          const b = DB.getBook(id);
+          b.titulo      = titulo;
+          b.autor_id    = +document.getElementById('f-autor').value;
+          b.genero_id   = +document.getElementById('f-genero').value;
+          b.anio        = +document.getElementById('f-anio').value;
+          b.isbn        = document.getElementById('f-isbn').value;
+          b.descripcion = document.getElementById('f-desc').value;
+        } else {
+          DB.books.push({
+            id: DB.books.length + 1,
+            titulo,
+            autor_id:    +document.getElementById('f-autor').value,
+            genero_id:   +document.getElementById('f-genero').value,
+            anio:        +document.getElementById('f-anio').value,
+            isbn:         document.getElementById('f-isbn').value,
+            descripcion:  document.getElementById('f-desc').value,
+            disponible: true,
+            portada: '📖',
+            color: '#2a2020'
+          });
+        }
+        renderLibros();
+
+      } else if (type === 'autor') {
+        const nombre = document.getElementById('f-nombre').value.trim();
+        if (!nombre) { showToast('El nombre es requerido', 'error'); return; }
+        if (id) {
+          const a = DB.getAuthor(id);
+          a.nombre       = nombre;
+          a.nacionalidad = document.getElementById('f-nac').value;
+          a.bio          = document.getElementById('f-bio').value;
+        } else {
+          DB.authors.push({
+            id: DB.authors.length + 1,
+            nombre,
+            nacionalidad: document.getElementById('f-nac').value,
+            bio:          document.getElementById('f-bio').value
+          });
+        }
+        renderAutores();
+
+      } else if (type === 'genero') {
+        const nombre = document.getElementById('f-gnombre').value.trim();
+        if (!nombre) { showToast('El nombre es requerido', 'error'); return; }
+        if (id) {
+          DB.getGenre(id).nombre = nombre;
+        } else {
+          DB.genres.push({ id: DB.genres.length + 1, nombre });
+        }
+        renderGeneros();
+      }
+
+      closeModal();
+      showToast('Guardado correctamente');
+    }
+
+    function deleteItem(type, id) {
+      if (!confirm('¿Confirmás la eliminación?')) return;
+      if (type === 'libro')   { DB.books        = DB.books.filter(x => x.id !== id);        renderLibros();   }
+      if (type === 'autor')   { DB.authors      = DB.authors.filter(x => x.id !== id);      renderAutores();  }
+      if (type === 'genero')  { DB.genres       = DB.genres.filter(x => x.id !== id);       renderGeneros();  }
+      if (type === 'reserva') { DB.reservations = DB.reservations.filter(x => x.id !== id); renderReservas(); }
+      if (type === 'usuario') { DB.users        = DB.users.filter(x => x.id !== id);        renderUsuarios(); }
+      showToast('Eliminado correctamente');
+    }
+
+    document.getElementById('modal').addEventListener('click', e => {
+      if (e.target === e.currentTarget) closeModal();
+    });
+
+    // Init
+    renderDashboard();
+  </script>
+</body>
+</html>

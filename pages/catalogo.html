@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Catálogo — BiblioDigital</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="../css/base.css"/>
+  <style>
+    .cat-header { padding: 6rem 3rem 2rem; border-bottom: 1px solid var(--border); background: var(--bg-card); }
+    .cat-header h1 { font-size: 2.2rem; margin-bottom: .4rem; }
+    .cat-header p  { color: var(--muted); font-size: .9rem; }
+    .cat-toolbar { padding: 1.25rem 3rem; background: var(--bg-card); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+    .search-box { display: flex; flex: 1; min-width: 200px; max-width: 380px; }
+    .search-box input { flex: 1; padding: .6rem 1rem; background: var(--bg); border: 1px solid var(--border); border-right: none; border-radius: 2px 0 0 2px; color: var(--cream); font-family: var(--font-body); font-size: .85rem; outline: none; }
+    .search-box input:focus { border-color: var(--gold-dim); }
+    .search-box input::placeholder { color: var(--muted); }
+    .search-box button { padding: .6rem 1rem; background: var(--gold); border: 1px solid var(--gold); border-radius: 0 2px 2px 0; cursor: pointer; font-size: .85rem; }
+    .filter-select { padding: .6rem .9rem; background: var(--bg); border: 1px solid var(--border); border-radius: 2px; color: var(--cream); font-family: var(--font-body); font-size: .82rem; outline: none; cursor: pointer; }
+    .filter-select:focus { border-color: var(--gold-dim); }
+    .filter-select option { background: var(--bg-card2); }
+    .results-count { font-size: .78rem; color: var(--muted); margin-left: auto; }
+
+    .cat-body { padding: 2.5rem 3rem; }
+    .books-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 1.75rem; }
+    .book-card { cursor: pointer; transition: transform .2s; }
+    .book-card:hover { transform: translateY(-5px); }
+    .book-card:hover .book-cover { border-color: var(--gold-dim); }
+    .book-cover { width: 100%; aspect-ratio: 2/3; border-radius: 2px 6px 6px 2px; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 2.8rem; margin-bottom: .75rem; transition: border-color .2s; position: relative; overflow: hidden; }
+    .book-cover::after { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 8px; background: rgba(0,0,0,.35); border-radius: 2px 0 0 2px; }
+    .book-genre { font-size: .68rem; letter-spacing: .1em; text-transform: uppercase; color: var(--gold); margin-bottom: .2rem; }
+    .book-title { font-family: var(--font-head); font-size: .92rem; line-height: 1.3; margin-bottom: .2rem; }
+    .book-author { font-size: .75rem; color: var(--muted); margin-bottom: .4rem; }
+
+    .empty-state { text-align: center; padding: 5rem 1rem; display: none; }
+    .empty-state.visible { display: block; }
+    .empty-state p { font-family: var(--font-head); font-size: 1.4rem; margin-bottom: .5rem; }
+    .empty-state span { font-size: .85rem; color: var(--muted); }
+
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.8); z-index: 200; display: none; align-items: center; justify-content: center; padding: 1.5rem; }
+    .modal-backdrop.open { display: flex; }
+    .modal { background: var(--bg-card); border: 1px solid var(--border); border-radius: 4px; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; }
+    .modal-header { display: flex; align-items: flex-start; justify-content: space-between; padding: 1.5rem 1.75rem 1rem; border-bottom: 1px solid var(--border); gap: 1rem; }
+    .modal-close { background: none; border: none; color: var(--muted); font-size: 1.4rem; cursor: pointer; line-height: 1; padding: 0; }
+    .modal-close:hover { color: var(--cream); }
+    .modal-body { padding: 1.5rem 1.75rem; }
+    .modal-book-row { display: flex; gap: 1.5rem; margin-bottom: 1.5rem; }
+    .modal-cover { width: 80px; height: 116px; flex-shrink: 0; border-radius: 2px 6px 6px 2px; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; border: 1px solid var(--border); }
+    .modal-title { font-family: var(--font-head); font-size: 1.4rem; margin-bottom: .3rem; }
+    .modal-meta { font-size: .82rem; color: var(--muted); margin-bottom: .5rem; }
+    .modal-meta span { color: var(--cream); }
+    .modal-desc { font-size: .88rem; color: var(--muted); line-height: 1.7; }
+    .modal-actions { display: flex; gap: .75rem; margin-top: 1.5rem; flex-wrap: wrap; }
+
+    @media (max-width: 768px) {
+      .cat-header, .cat-toolbar, .cat-body { padding-left: 1.25rem; padding-right: 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar" id="main-nav"></nav>
+
+  <div class="page-content">
+    <div class="cat-header">
+      <p class="section-label">Explorar</p>
+      <h1>Catálogo de libros</h1>
+      <p>Encontrá tu próxima lectura. Filtrá por género, autor o disponibilidad.</p>
+    </div>
+
+    <div class="cat-toolbar">
+      <div class="search-box">
+        <input type="text" id="search-input" placeholder="Buscar por título o autor…"/>
+        <button>🔍</button>
+      </div>
+      <select class="filter-select" id="filter-genre">
+        <option value="">Todos los géneros</option>
+      </select>
+      <select class="filter-select" id="filter-avail">
+        <option value="">Disponibilidad</option>
+        <option value="true">Disponibles</option>
+        <option value="false">Reservados</option>
+      </select>
+      <span class="results-count" id="results-count"></span>
+    </div>
+
+    <div class="cat-body">
+      <div class="books-grid" id="books-grid"></div>
+      <div class="empty-state" id="empty-state">
+        <p>Sin resultados</p>
+        <span>Probá con otros términos o filtros.</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="modal">
+    <div class="modal">
+      <div class="modal-header">
+        <div id="modal-header-content"></div>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
+      <div class="modal-body" id="modal-body"></div>
+    </div>
+  </div>
+
+  <script src="../js/data.js"></script>
+  <script src="../js/utils.js"></script>
+  <script>
+    renderNav('catalogo');
+
+    const genreSelect = document.getElementById('filter-genre');
+    DB.genres.forEach(g => {
+      const opt = document.createElement('option');
+      opt.value = g.id; opt.textContent = g.nombre;
+      genreSelect.appendChild(opt);
+    });
+
+    function renderBooks() {
+      const query = document.getElementById('search-input').value.toLowerCase();
+      const genre = document.getElementById('filter-genre').value;
+      const avail = document.getElementById('filter-avail').value;
+
+      let books = DB.books.map(DB.getBookWithDetails);
+      if (query) books = books.filter(b => b.titulo.toLowerCase().includes(query) || b.autor.nombre.toLowerCase().includes(query));
+      if (genre) books = books.filter(b => b.genero_id == genre);
+      if (avail !== '') books = books.filter(b => String(b.disponible) === avail);
+
+      const grid  = document.getElementById('books-grid');
+      const empty = document.getElementById('empty-state');
+      document.getElementById('results-count').textContent = `${books.length} resultado${books.length !== 1 ? 's' : ''}`;
+
+      if (!books.length) { grid.innerHTML = ''; empty.classList.add('visible'); return; }
+      empty.classList.remove('visible');
+
+      grid.innerHTML = books.map(b => `
+        <div class="book-card" onclick="openModal(${b.id})">
+          <div class="book-cover" style="background:${b.color}">${b.portada}</div>
+          <p class="book-genre">${b.genero.nombre}</p>
+          <p class="book-title">${b.titulo}</p>
+          <p class="book-author">${b.autor.nombre}</p>
+          <span class="badge ${b.disponible ? 'badge-available' : 'badge-reserved'}">${b.disponible ? 'Disponible' : 'Reservado'}</span>
+        </div>`).join('');
+    }
+
+    function openModal(bookId) {
+      const b    = DB.getBookWithDetails(DB.getBook(bookId));
+      const user = Auth.getUser();
+      document.getElementById('modal-header-content').innerHTML = `
+        <p class="book-genre">${b.genero.nombre}</p>
+        <p style="font-family:var(--font-head);font-size:1.1rem;">${b.titulo}</p>`;
+
+      const canReserve = b.disponible && user && user.role === 'user';
+      const reserveBtn = canReserve
+        ? `<button class="btn btn-primary" onclick="reserveBook(${b.id})">Reservar libro</button>`
+        : !user
+          ? `<a href="login.html" class="btn btn-ghost">Iniciá sesión para reservar</a>`
+          : `<span class="badge badge-reserved" style="padding:.4rem .8rem;">No disponible</span>`;
+
+      document.getElementById('modal-body').innerHTML = `
+        <div class="modal-book-row">
+          <div class="modal-cover" style="background:${b.color}">${b.portada}</div>
+          <div>
+            <p class="modal-title">${b.titulo}</p>
+            <p class="modal-meta">Autor: <span>${b.autor.nombre}</span></p>
+            <p class="modal-meta">Género: <span>${b.genero.nombre}</span></p>
+            <p class="modal-meta">Año: <span>${b.anio}</span></p>
+            <p class="modal-meta">ISBN: <span>${b.isbn}</span></p>
+          </div>
+        </div>
+        <p class="modal-desc">${b.descripcion}</p>
+        <div class="modal-actions">${reserveBtn}</div>`;
+
+      document.getElementById('modal').classList.add('open');
+    }
+
+    function closeModal() { document.getElementById('modal').classList.remove('open'); }
+
+    function reserveBook(bookId) {
+      const user = Auth.getUser();
+      if (!user) return;
+      const book = DB.getBook(bookId);
+      if (!book || !book.disponible) return;
+      book.disponible = false;
+      const today      = new Date().toISOString().split('T')[0];
+      const devolucion = new Date(Date.now() + 14*24*60*60*1000).toISOString().split('T')[0];
+      DB.reservations.push({ id: DB.reservations.length+1, user_id: user.id, book_id: bookId, fecha_reserva: today, fecha_devolucion: devolucion, estado: 'activa' });
+      closeModal();
+      renderBooks();
+      showToast(`"${book.titulo}" reservado exitosamente`);
+    }
+
+    document.getElementById('search-input').addEventListener('input', debounce(renderBooks));
+    document.getElementById('filter-genre').addEventListener('change', renderBooks);
+    document.getElementById('filter-avail').addEventListener('change', renderBooks);
+    document.getElementById('modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
+
+    renderBooks();
+  </script>
+</body>
+</html>

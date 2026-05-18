@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Iniciar sesión — BiblioDigital</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="../css/base.css"/>
+  <style>
+    body { display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+    .auth-wrap {
+      display: grid; grid-template-columns: 1fr 1fr;
+      width: 100%; max-width: 900px; min-height: 540px;
+      border: 1px solid var(--border); border-radius: 4px; overflow: hidden;
+    }
+    .auth-panel { background: var(--bg-card); padding: 3rem; display: flex; flex-direction: column; justify-content: center; }
+    .auth-side { background: var(--bg-card2); border-left: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 3rem; gap: 1.5rem; text-align: center; }
+    .auth-back { position: fixed; top: 1.5rem; left: 1.5rem; font-size: .78rem; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; display: flex; align-items: center; gap: .4rem; }
+    .auth-back:hover { color: var(--cream); }
+    .auth-logo { font-family: var(--font-head); font-size: 1.1rem; color: var(--gold); margin-bottom: .25rem; }
+    .auth-logo span { color: var(--cream); font-style: italic; }
+    .auth-title { font-family: var(--font-head); font-size: 1.8rem; margin-bottom: .4rem; }
+    .auth-sub { font-size: .85rem; color: var(--muted); margin-bottom: 2rem; }
+    .auth-footer { margin-top: 1.5rem; font-size: .82rem; color: var(--muted); text-align: center; }
+    .auth-footer a { color: var(--gold); }
+    .demo-hint { font-size: .72rem; color: var(--muted); background: var(--bg); border: 1px solid var(--border); border-radius: 3px; padding: .75rem 1rem; line-height: 1.6; width: 100%; }
+    .demo-hint strong { color: var(--cream); font-weight: 400; }
+    .side-quote { font-family: var(--font-head); font-size: 1.4rem; font-style: italic; color: var(--cream); line-height: 1.4; }
+    .side-attr { font-size: .78rem; color: var(--muted); }
+    @media (max-width: 660px) { .auth-wrap { grid-template-columns: 1fr; } .auth-side { display: none; } }
+  </style>
+</head>
+<body>
+  <a href="../index.html" class="auth-back">← Volver al inicio</a>
+
+  <div class="auth-wrap">
+    <div class="auth-panel">
+      <p class="auth-logo">Biblio<span>Digital</span></p>
+      <h1 class="auth-title">Bienvenido</h1>
+      <p class="auth-sub">Ingresá a tu cuenta para explorar el catálogo.</p>
+
+      <form id="login-form">
+        <div class="form-group">
+          <label class="form-label" for="email">Correo electrónico</label>
+          <input class="form-input" type="email" id="email" placeholder="tu@correo.com" required/>
+          <p class="form-error" id="err-email"></p>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="password">Contraseña</label>
+          <input class="form-input" type="password" id="password" placeholder="••••••••" required/>
+          <p class="form-error" id="err-pass"></p>
+        </div>
+        <p class="form-error" id="err-general" style="margin-bottom:.75rem;"></p>
+        <button type="submit" class="btn btn-primary" style="width:100%;padding:.75rem;">Iniciar sesión</button>
+      </form>
+
+      <p class="auth-footer">¿No tenés cuenta? <a href="register.html">Registrate gratis</a></p>
+    </div>
+
+    <div class="auth-side">
+      <div style="font-size:3rem;">📚</div>
+      <p class="side-quote">"Un lector vive mil vidas antes de morir."</p>
+      <p class="side-attr">— George R.R. Martin</p>
+      <div class="demo-hint">
+        <strong>Cuentas de prueba:</strong><br/>
+        Admin: luciana@mail.com / 1234<br/>
+        Usuario: ana@mail.com / 1234
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/data.js"></script>
+  <script src="../js/utils.js"></script>
+  <script>
+    if (Auth.isLoggedIn()) {
+      window.location.href = Auth.isAdmin() ? 'panel-admin.html' : 'panel-usuario.html';
+    }
+
+    document.getElementById('login-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const email = document.getElementById('email').value.trim();
+      const pass  = document.getElementById('password').value;
+      const errG  = document.getElementById('err-general');
+      errG.classList.remove('visible');
+
+      const user = DB.getUserByEmail(email);
+      if (!user || user.password !== pass) {
+        errG.textContent = 'Correo o contraseña incorrectos.';
+        errG.classList.add('visible');
+        return;
+      }
+
+      Auth.login({ id: user.id, nombre: user.nombre, email: user.email, role: user.role });
+      window.location.href = user.role === 'admin' ? 'panel-admin.html' : 'panel-usuario.html';
+    });
+  </script>
+</body>
+</html>

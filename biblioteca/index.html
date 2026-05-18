@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BiblioDigital</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0d0c0b;
+      --bg-card:   #131210;
+      --bg-card2:  #1a1815;
+      --gold:      #c9a84c;
+      --gold-dim:  #8a6e2f;
+      --cream:     #f0e8d8;
+      --muted:     #7a7266;
+      --border:    #2a2620;
+      --font-head: 'Playfair Display', Georgia, serif;
+      --font-body: 'DM Sans', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--cream);
+      font-family: var(--font-body);
+      font-weight: 300;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.25rem 3rem;
+      border-bottom: 1px solid var(--border);
+      background: rgba(13,12,11,0.92);
+      backdrop-filter: blur(8px);
+    }
+
+    .nav-logo {
+      font-family: var(--font-head);
+      font-size: 1.3rem;
+      letter-spacing: 0.02em;
+      color: var(--gold);
+      text-decoration: none;
+    }
+    .nav-logo span { color: var(--cream); font-style: italic; }
+
+    .nav-links {
+      display: flex; gap: 2rem; list-style: none;
+    }
+    .nav-links a {
+      color: var(--muted); text-decoration: none;
+      font-size: 0.85rem; letter-spacing: 0.08em; text-transform: uppercase;
+      transition: color .2s;
+    }
+    .nav-links a:hover { color: var(--cream); }
+
+    .nav-actions { display: flex; gap: 0.75rem; }
+
+    .btn {
+      font-family: var(--font-body);
+      font-size: 0.82rem; letter-spacing: 0.07em; text-transform: uppercase;
+      padding: 0.55rem 1.3rem; border-radius: 2px; cursor: pointer;
+      text-decoration: none; transition: all .2s;
+    }
+    .btn-ghost {
+      background: transparent; border: 1px solid var(--border); color: var(--muted);
+    }
+    .btn-ghost:hover { border-color: var(--gold-dim); color: var(--cream); }
+    .btn-primary {
+      background: var(--gold); border: 1px solid var(--gold); color: #0d0c0b;
+      font-weight: 500;
+    }
+    .btn-primary:hover { background: #d4b05a; }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: grid; grid-template-columns: 1fr 1fr; align-items: center;
+      padding: 6rem 3rem 4rem;
+      gap: 4rem;
+      position: relative; overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute; top: 0; right: 0;
+      width: 55%; height: 100%;
+      background: linear-gradient(135deg, #1a1612 0%, #0d0c0b 100%);
+      border-left: 1px solid var(--border);
+      z-index: 0;
+    }
+
+    .hero-text { position: relative; z-index: 1; }
+
+    .hero-eyebrow {
+      font-size: 0.75rem; letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--gold); margin-bottom: 1.5rem;
+      display: flex; align-items: center; gap: 0.75rem;
+    }
+    .hero-eyebrow::before {
+      content: ''; display: block; width: 2rem; height: 1px;
+      background: var(--gold);
+    }
+
+    .hero h1 {
+      font-family: var(--font-head);
+      font-size: clamp(2.5rem, 5vw, 4rem);
+      line-height: 1.1; font-weight: 400;
+      margin-bottom: 1.5rem;
+    }
+    .hero h1 em { font-style: italic; color: var(--gold); }
+
+    .hero-desc {
+      color: var(--muted); font-size: 1rem; max-width: 38ch;
+      margin-bottom: 2.5rem; line-height: 1.75;
+    }
+
+    .hero-cta { display: flex; gap: 1rem; flex-wrap: wrap; }
+
+    .hero-stats {
+      display: flex; gap: 2.5rem; margin-top: 3rem;
+      padding-top: 2rem; border-top: 1px solid var(--border);
+    }
+    .stat-num {
+      font-family: var(--font-head); font-size: 1.8rem;
+      color: var(--cream); display: block;
+    }
+    .stat-lbl {
+      font-size: 0.75rem; color: var(--muted);
+      letter-spacing: 0.08em; text-transform: uppercase;
+    }
+
+    /* Book shelf illustration */
+    .hero-visual {
+      position: relative; z-index: 1;
+      display: flex; flex-direction: column; align-items: center;
+      gap: 1.5rem;
+    }
+
+    .shelf {
+      display: flex; align-items: flex-end; gap: 6px;
+      padding: 1rem 1.5rem 0;
+      position: relative;
+    }
+    .shelf::after {
+      content: ''; position: absolute; bottom: 0; left: 0; right: 0;
+      height: 10px; background: #2a2420; border-radius: 2px;
+    }
+
+    .book {
+      border-radius: 2px 4px 4px 2px;
+      cursor: pointer;
+      transition: transform .25s ease;
+      position: relative;
+      box-shadow: inset -3px 0 6px rgba(0,0,0,.4);
+    }
+    .book:hover { transform: translateY(-8px); }
+
+    .book-spine {
+      writing-mode: vertical-rl; text-orientation: mixed;
+      transform: rotate(180deg);
+      font-size: 0.62rem; font-family: var(--font-head);
+      color: rgba(255,255,255,.65);
+      position: absolute; top: 50%; left: 50%;
+      transform: rotate(180deg) translate(50%, 50%);
+      white-space: nowrap; overflow: hidden;
+      text-overflow: ellipsis;
+      max-height: 80%; letter-spacing: 0.04em;
+    }
+
+    /* Featured book card */
+    .featured-book {
+      background: var(--bg-card2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1.5rem;
+      display: flex; gap: 1.25rem; align-items: flex-start;
+      width: 100%; max-width: 380px;
+    }
+    .book-cover-thumb {
+      width: 64px; height: 88px; flex-shrink: 0;
+      border-radius: 2px 4px 4px 2px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem;
+    }
+    .book-meta { flex: 1; }
+    .book-tag {
+      font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--gold); margin-bottom: 0.35rem;
+    }
+    .book-title-sm {
+      font-family: var(--font-head); font-size: 1rem;
+      margin-bottom: 0.25rem; line-height: 1.3;
+    }
+    .book-author { font-size: 0.78rem; color: var(--muted); margin-bottom: 0.75rem; }
+    .book-avail {
+      font-size: 0.72rem; color: #5a9e6a;
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    .book-avail::before {
+      content: ''; width: 6px; height: 6px;
+      border-radius: 50%; background: #5a9e6a; display: block;
+    }
+
+    /* ── SECTION COMMON ── */
+    section { padding: 5rem 3rem; }
+
+    .section-label {
+      font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--gold); margin-bottom: 1rem;
+    }
+    .section-title {
+      font-family: var(--font-head); font-size: clamp(1.8rem, 3vw, 2.5rem);
+      font-weight: 400; margin-bottom: 1rem; line-height: 1.2;
+    }
+    .section-desc { color: var(--muted); max-width: 50ch; line-height: 1.7; }
+
+    /* ── FEATURES ── */
+    .features {
+      background: var(--bg-card);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .features-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 0; margin-top: 3rem;
+    }
+
+    .feature-item {
+      padding: 2rem;
+      border-right: 1px solid var(--border);
+    }
+    .feature-item:last-child { border-right: none; }
+
+    .feature-icon {
+      width: 44px; height: 44px;
+      border: 1px solid var(--border); border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 1.25rem; font-size: 1.2rem;
+    }
+    .feature-title {
+      font-family: var(--font-head); font-size: 1.05rem;
+      margin-bottom: 0.6rem;
+    }
+    .feature-desc { font-size: 0.85rem; color: var(--muted); line-height: 1.65; }
+
+    /* ── CATALOGUE PREVIEW ── */
+    .catalogue-header {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      margin-bottom: 3rem; gap: 2rem; flex-wrap: wrap;
+    }
+
+    .catalogue-search {
+      display: flex; gap: 0; max-width: 340px; width: 100%;
+    }
+    .catalogue-search input {
+      flex: 1; padding: 0.65rem 1rem;
+      background: var(--bg-card2); border: 1px solid var(--border);
+      border-right: none; border-radius: 2px 0 0 2px;
+      color: var(--cream); font-family: var(--font-body); font-size: 0.85rem;
+      outline: none;
+    }
+    .catalogue-search input::placeholder { color: var(--muted); }
+    .catalogue-search input:focus { border-color: var(--gold-dim); }
+    .catalogue-search button {
+      padding: 0.65rem 1.1rem;
+      background: var(--gold); border: 1px solid var(--gold);
+      border-radius: 0 2px 2px 0; cursor: pointer;
+      font-size: 0.85rem;
+    }
+
+    .books-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .book-card {
+      cursor: pointer;
+      transition: transform .2s;
+    }
+    .book-card:hover { transform: translateY(-4px); }
+    .book-card:hover .book-card-cover { border-color: var(--gold-dim); }
+
+    .book-card-cover {
+      width: 100%; aspect-ratio: 2/3;
+      border-radius: 2px 6px 6px 2px;
+      margin-bottom: 0.75rem;
+      border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.5rem;
+      transition: border-color .2s;
+      position: relative; overflow: hidden;
+    }
+    .book-card-cover::after {
+      content: '';
+      position: absolute; left: 0; top: 0; bottom: 0;
+      width: 8px;
+      background: rgba(0,0,0,.35);
+      border-radius: 2px 0 0 2px;
+    }
+
+    .book-card-genre {
+      font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--gold); margin-bottom: 0.2rem;
+    }
+    .book-card-title {
+      font-family: var(--font-head); font-size: 0.9rem;
+      line-height: 1.3; margin-bottom: 0.2rem;
+    }
+    .book-card-author { font-size: 0.75rem; color: var(--muted); }
+
+    .available-badge {
+      display: inline-block; margin-top: 0.4rem;
+      font-size: 0.65rem; letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 0.2rem 0.5rem; border-radius: 2px;
+      background: rgba(90,158,106,0.12); color: #5a9e6a;
+      border: 1px solid rgba(90,158,106,0.25);
+    }
+    .reserved-badge {
+      display: inline-block; margin-top: 0.4rem;
+      font-size: 0.65rem; letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 0.2rem 0.5rem; border-radius: 2px;
+      background: rgba(201,168,76,0.1); color: var(--gold-dim);
+      border: 1px solid rgba(201,168,76,0.2);
+    }
+
+    .view-all-row {
+      text-align: center; margin-top: 3rem;
+    }
+
+    /* ── HOW IT WORKS ── */
+    .how {
+      background: var(--bg-card);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .steps {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 0; margin-top: 3rem;
+    }
+
+    .step {
+      padding: 2rem;
+      border-right: 1px solid var(--border);
+      position: relative;
+    }
+    .step:last-child { border-right: none; }
+
+    .step-num {
+      font-family: var(--font-head); font-size: 3rem;
+      color: var(--border); line-height: 1;
+      margin-bottom: 1rem;
+    }
+    .step-title {
+      font-family: var(--font-head); font-size: 1rem;
+      margin-bottom: 0.5rem;
+    }
+    .step-desc { font-size: 0.83rem; color: var(--muted); line-height: 1.6; }
+
+    /* ── CTA BANNER ── */
+    .cta-banner {
+      text-align: center; padding: 5rem 3rem;
+      border-top: 1px solid var(--border);
+    }
+    .cta-banner h2 {
+      font-family: var(--font-head); font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 400; margin-bottom: 1rem;
+    }
+    .cta-banner h2 em { font-style: italic; color: var(--gold); }
+    .cta-banner p { color: var(--muted); margin-bottom: 2.5rem; }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--bg-card);
+      border-top: 1px solid var(--border);
+      padding: 2.5rem 3rem;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 1rem;
+    }
+    footer .nav-logo { font-size: 1.1rem; }
+    footer p { font-size: 0.78rem; color: var(--muted); }
+    footer a { color: var(--muted); text-decoration: none; }
+    footer a:hover { color: var(--cream); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      nav { padding: 1rem 1.25rem; }
+      .nav-links { display: none; }
+      .hero { grid-template-columns: 1fr; padding: 5rem 1.25rem 3rem; gap: 2.5rem; }
+      .hero::before { display: none; }
+      section { padding: 3.5rem 1.25rem; }
+      .features-grid, .steps { grid-template-columns: 1fr 1fr; }
+      .feature-item, .step { border-right: none; border-bottom: 1px solid var(--border); }
+      footer { padding: 2rem 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a href="#" class="nav-logo">Biblio<span>Digital</span></a>
+    <ul class="nav-links">
+      <li><a href="#catalogo">Catálogo</a></li>
+      <li><a href="#como-funciona">Cómo funciona</a></li>
+      <li><a href="#">Géneros</a></li>
+    </ul>
+    <div class="nav-actions">
+      <a href="login.html" class="btn btn-ghost">Iniciar sesión</a>
+      <a href="register.html" class="btn btn-primary">Registrarse</a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-text">
+      <p class="hero-eyebrow">Biblioteca digital</p>
+      <h1>Cada libro,<br><em>a un clic</em><br>de distancia.</h1>
+      <p class="hero-desc">
+        Explorá, buscá y reservá libros de manera simple y organizada.
+        Un catálogo digital moderno para lectores y bibliotecas.
+      </p>
+      <div class="hero-cta">
+        <a href="#catalogo" class="btn btn-primary">Explorar catálogo</a>
+        <a href="register.html" class="btn btn-ghost">Crear cuenta gratis</a>
+      </div>
+      <div class="hero-stats">
+        <div>
+          <span class="stat-num">1.200+</span>
+          <span class="stat-lbl">Libros disponibles</span>
+        </div>
+        <div>
+          <span class="stat-num">80+</span>
+          <span class="stat-lbl">Géneros y autores</span>
+        </div>
+        <div>
+          <span class="stat-num">100%</span>
+          <span class="stat-lbl">Acceso digital</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-visual">
+
+      <!-- Estante decorativo -->
+      <div class="shelf">
+        <div class="book" style="width:28px;height:160px;background:#3d2b1f;"><span class="book-spine">Borges</span></div>
+        <div class="book" style="width:22px;height:130px;background:#1e3040;"><span class="book-spine">Kafka</span></div>
+        <div class="book" style="width:32px;height:175px;background:#2d1e30;"><span class="book-spine">García Márquez</span></div>
+        <div class="book" style="width:20px;height:120px;background:#1a2e1a;"><span class="book-spine">Quiroga</span></div>
+        <div class="book" style="width:26px;height:150px;background:#362010;"><span class="book-spine">Cortázar</span></div>
+        <div class="book" style="width:24px;height:140px;background:#1c2a3a;"><span class="book-spine">Rulfo</span></div>
+        <div class="book" style="width:30px;height:165px;background:#2a1c2a;"><span class="book-spine">Vargas Llosa</span></div>
+        <div class="book" style="width:18px;height:110px;background:#1e3020;"><span class="book-spine">Paz</span></div>
+        <div class="book" style="width:28px;height:155px;background:#3a2010;"><span class="book-spine">Neruda</span></div>
+      </div>
+
+      <!-- Libro destacado -->
+      <div class="featured-book">
+        <div class="book-cover-thumb" style="background:#2d1e30;">📖</div>
+        <div class="book-meta">
+          <p class="book-tag">Destacado esta semana</p>
+          <p class="book-title-sm">Cien años de soledad</p>
+          <p class="book-author">Gabriel García Márquez</p>
+          <span class="book-avail">Disponible para reserva</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="features">
+    <div>
+      <p class="section-label">¿Qué ofrecemos?</p>
+      <h2 class="section-title">Todo lo que necesitás<br>para gestionar tu biblioteca.</h2>
+    </div>
+    <div class="features-grid">
+      <div class="feature-item">
+        <div class="feature-icon">📚</div>
+        <h3 class="feature-title">Catálogo completo</h3>
+        <p class="feature-desc">Accedé a todos los libros con información detallada: autor, género, sinopsis y disponibilidad en tiempo real.</p>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">🔍</div>
+        <h3 class="feature-title">Búsqueda y filtros</h3>
+        <p class="feature-desc">Encontrá lo que buscás filtrando por género, autor o título. Resultados instantáneos y precisos.</p>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">🗓️</div>
+        <h3 class="feature-title">Sistema de reservas</h3>
+        <p class="feature-desc">Reservá tu próxima lectura fácilmente. Gestioná tus reservas activas desde tu panel personal.</p>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">🔒</div>
+        <h3 class="feature-title">Panel de usuario</h3>
+        <p class="feature-desc">Tu historial, tus reservas y tus favoritos organizados en un panel claro y accesible.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CATALOGUE PREVIEW -->
+  <section id="catalogo">
+    <div class="catalogue-header">
+      <div>
+        <p class="section-label">Catálogo</p>
+        <h2 class="section-title">Explorá los libros</h2>
+        <p class="section-desc">Una selección de títulos disponibles. Registrate para ver el catálogo completo y realizar reservas.</p>
+      </div>
+      <div class="catalogue-search">
+        <input type="text" placeholder="Buscar por título o autor…" />
+        <button>🔍</button>
+      </div>
+    </div>
+
+    <div class="books-grid">
+
+      <div class="book-card">
+        <div class="book-card-cover" style="background:#2a1c2a;">📕</div>
+        <p class="book-card-genre">Literatura</p>
+        <p class="book-card-title">Rayuela</p>
+        <p class="book-card-author">Julio Cortázar</p>
+        <span class="available-badge">Disponible</span>
+      </div>
+
+      <div class="book-card">
+        <div class="book-card-cover" style="background:#1e3040;">📘</div>
+        <p class="book-card-genre">Clásicos</p>
+        <p class="book-card-title">El proceso</p>
+        <p class="book-card-author">Franz Kafka</p>
+        <span class="reserved-badge">Reservado</span>
+      </div>
+
+      <div class="book-card">
+        <div class="book-card-cover" style="background:#1a2e1a;">📗</div>
+        <p class="book-card-genre">Poesía</p>
+        <p class="book-card-title">Veinte poemas de amor</p>
+        <p class="book-card-author">Pablo Neruda</p>
+        <span class="available-badge">Disponible</span>
+      </div>
+
+      <div class="book-card">
+        <div class="book-card-cover" style="background:#3d2b1f;">📙</div>
+        <p class="book-card-genre">Ficción</p>
+        <p class="book-card-title">Pedro Páramo</p>
+        <p class="book-card-author">Juan Rulfo</p>
+        <span class="available-badge">Disponible</span>
+      </div>
+
+      <div class="book-card">
+        <div class="book-card-cover" style="background:#1c2a3a;">📘</div>
+        <p class="book-card-genre">Fantasía</p>
+        <p class="book-card-title">Ficciones</p>
+        <p class="book-card-author">Jorge Luis Borges</p>
+        <span class="reserved-badge">Reservado</span>
+      </div>
+
+      <div class="book-card">
+        <div class="book-card-cover" style="background:#2d1e30;">📓</div>
+        <p class="book-card-genre">Historia</p>
+        <p class="book-card-title">La vorágine</p>
+        <p class="book-card-author">José E. Rivera</p>
+        <span class="available-badge">Disponible</span>
+      </div>
+
+    </div>
+
+    <div class="view-all-row">
+      <a href="register.html" class="btn btn-ghost" style="font-size:.85rem;">Ver catálogo completo →</a>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="how" id="como-funciona">
+    <p class="section-label">¿Cómo funciona?</p>
+    <h2 class="section-title">Tres pasos para<br>tu próxima lectura.</h2>
+    <div class="steps">
+      <div class="step">
+        <p class="step-num">01</p>
+        <h3 class="step-title">Creá tu cuenta</h3>
+        <p class="step-desc">Registrate de forma gratuita en minutos. Solo necesitás un correo y una contraseña.</p>
+      </div>
+      <div class="step">
+        <p class="step-num">02</p>
+        <h3 class="step-title">Explorá el catálogo</h3>
+        <p class="step-desc">Buscá por título, autor o género. Revisá los detalles de cada libro y su disponibilidad.</p>
+      </div>
+      <div class="step">
+        <p class="step-num">03</p>
+        <h3 class="step-title">Realizá tu reserva</h3>
+        <p class="step-desc">Con un clic reservás el libro que elegiste. Gestioná todo desde tu panel personal.</p>
+      </div>
+      <div class="step">
+        <p class="step-num">04</p>
+        <h3 class="step-title">Seguí tu historial</h3>
+        <p class="step-desc">Consultá tus reservas activas, pasadas y tu lista de favoritos en cualquier momento.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA BANNER -->
+  <section class="cta-banner">
+    <h2>Tu próxima lectura<br><em>te está esperando.</em></h2>
+    <p>Accedé al catálogo completo de forma gratuita. Registrate en segundos.</p>
+    <a href="register.html" class="btn btn-primary" style="font-size:.9rem; padding:.75rem 2.5rem;">Comenzar ahora</a>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <a href="#" class="nav-logo">Biblio<span>Digital</span></a>
+    <p>Proyecto académico &mdash; Backend con Python y Django</p>
+    <p>
+      <a href="#">Catálogo</a> &nbsp;·&nbsp;
+      <a href="#">Iniciar sesión</a> &nbsp;·&nbsp;
+      <a href="#">Registrarse</a>
+    </p>
+  </footer>
+
+</body>
+</html>

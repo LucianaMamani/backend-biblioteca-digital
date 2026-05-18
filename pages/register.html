@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Registrarse — BiblioDigital</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="../css/base.css"/>
+  <style>
+    body { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 2rem; }
+    .auth-back { position: fixed; top: 1.5rem; left: 1.5rem; font-size: .78rem; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; display: flex; align-items: center; gap: .4rem; }
+    .auth-back:hover { color: var(--cream); }
+    .reg-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 4px; padding: 3rem; width: 100%; max-width: 480px; }
+    .auth-logo { font-family: var(--font-head); font-size: 1.1rem; color: var(--gold); margin-bottom: .25rem; }
+    .auth-logo span { color: var(--cream); font-style: italic; }
+    .auth-title { font-family: var(--font-head); font-size: 1.8rem; margin-bottom: .4rem; }
+    .auth-sub { font-size: .85rem; color: var(--muted); margin-bottom: 2rem; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .auth-footer { margin-top: 1.5rem; font-size: .82rem; color: var(--muted); text-align: center; }
+    .auth-footer a { color: var(--gold); }
+    .terms { font-size: .78rem; color: var(--muted); margin-top: 1rem; text-align: center; }
+  </style>
+</head>
+<body>
+  <a href="../index.html" class="auth-back">← Volver al inicio</a>
+
+  <div class="reg-card">
+    <p class="auth-logo">Biblio<span>Digital</span></p>
+    <h1 class="auth-title">Crear cuenta</h1>
+    <p class="auth-sub">Registrate para explorar y reservar libros.</p>
+
+    <form id="reg-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="nombre">Nombre</label>
+          <input class="form-input" type="text" id="nombre" placeholder="Ana" required/>
+          <p class="form-error" id="err-nombre"></p>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="apellido">Apellido</label>
+          <input class="form-input" type="text" id="apellido" placeholder="García" required/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="email">Correo electrónico</label>
+        <input class="form-input" type="email" id="email" placeholder="tu@correo.com" required/>
+        <p class="form-error" id="err-email"></p>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="password">Contraseña</label>
+        <input class="form-input" type="password" id="password" placeholder="Mínimo 6 caracteres" required/>
+        <p class="form-error" id="err-pass"></p>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="password2">Confirmar contraseña</label>
+        <input class="form-input" type="password" id="password2" placeholder="Repetí la contraseña" required/>
+        <p class="form-error" id="err-pass2"></p>
+      </div>
+      <p class="form-error" id="err-general" style="margin-bottom:.75rem;"></p>
+      <button type="submit" class="btn btn-primary" style="width:100%;padding:.75rem;">Crear cuenta</button>
+    </form>
+
+    <p class="terms">Al registrarte aceptás los términos del sistema.</p>
+    <p class="auth-footer">¿Ya tenés cuenta? <a href="login.html">Iniciá sesión</a></p>
+  </div>
+
+  <script src="../js/data.js"></script>
+  <script src="../js/utils.js"></script>
+  <script>
+    if (Auth.isLoggedIn()) window.location.href = 'panel-usuario.html';
+
+    document.getElementById('reg-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const nombre   = document.getElementById('nombre').value.trim();
+      const apellido = document.getElementById('apellido').value.trim();
+      const email    = document.getElementById('email').value.trim();
+      const pass     = document.getElementById('password').value;
+      const pass2    = document.getElementById('password2').value;
+      let valid = true;
+
+      ['err-nombre','err-email','err-pass','err-pass2','err-general'].forEach(id => {
+        const el = document.getElementById(id);
+        el.textContent = ''; el.classList.remove('visible');
+      });
+
+      if (!nombre) {
+        document.getElementById('err-nombre').textContent = 'El nombre es requerido.';
+        document.getElementById('err-nombre').classList.add('visible'); valid = false;
+      }
+      if (!/\S+@\S+\.\S+/.test(email)) {
+        document.getElementById('err-email').textContent = 'Correo inválido.';
+        document.getElementById('err-email').classList.add('visible'); valid = false;
+      }
+      if (DB.getUserByEmail(email)) {
+        document.getElementById('err-email').textContent = 'Este correo ya está registrado.';
+        document.getElementById('err-email').classList.add('visible'); valid = false;
+      }
+      if (pass.length < 6) {
+        document.getElementById('err-pass').textContent = 'Mínimo 6 caracteres.';
+        document.getElementById('err-pass').classList.add('visible'); valid = false;
+      }
+      if (pass !== pass2) {
+        document.getElementById('err-pass2').textContent = 'Las contraseñas no coinciden.';
+        document.getElementById('err-pass2').classList.add('visible'); valid = false;
+      }
+      if (!valid) return;
+
+      const newUser = { id: DB.users.length + 1, nombre: `${nombre} ${apellido}`, email, password: pass, role: 'user' };
+      DB.users.push(newUser);
+      Auth.login({ id: newUser.id, nombre: newUser.nombre, email: newUser.email, role: 'user' });
+      showToast('¡Cuenta creada exitosamente!');
+      setTimeout(() => window.location.href = 'panel-usuario.html', 1000);
+    });
+  </script>
+</body>
+</html>
