@@ -1,0 +1,13 @@
+# Entorno virtual
+biblioteca_digital/env/
+
+# Base de datos local
+biblioteca_digital/db.sqlite3
+
+# Caché de Python
+__pycache__/
+**/__pycache__/
+*.pyc
+
+# VS Code
+.vscode/
