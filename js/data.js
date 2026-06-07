@@ -1,6 +1,6 @@
 // ── MOCK DATA (reemplazar con fetch() a la API Django) ──
 
-const DB = {
+/*const DB = {
   genres: [
     { id: 1, nombre: 'Literatura latinoamericana' },
     { id: 2, nombre: 'Clásicos universales' },
@@ -49,6 +49,44 @@ const DB = {
   getUser:             (id) => DB.users.find(u => u.id === id),
   getUserByEmail:      (email) => DB.users.find(u => u.email === email),
   getBookWithDetails:  (book) => ({ ...book, autor: DB.getAuthor(book.autor_id), genero: DB.getGenre(book.genero_id) }),
+  getUserReservations: (user_id) =>
+    DB.reservations
+      .filter(r => r.user_id === user_id)
+      .map(r => ({ ...r, libro: DB.getBookWithDetails(DB.getBook(r.book_id)) })),
+};*/
+
+// ── API CONFIG ──
+const API_URL = 'http://127.0.0.1:8000/api';
+
+const DB = {
+  genres: [],
+  authors: [],
+  books: [],
+  users: [],
+  reservations: [],
+
+  async cargarDatos() {
+    const [libros, autores, generos] = await Promise.all([
+      fetch(`${API_URL}/libros/`).then(r => r.json()),
+      fetch(`${API_URL}/autores/`).then(r => r.json()),
+      fetch(`${API_URL}/generos/`).then(r => r.json()),
+    ]);
+
+    this.books   = libros;
+    this.authors = autores;
+    this.genres  = generos;
+  },
+
+  getBook:            (id) => DB.books.find(b => b.id === id),
+  getAuthor:          (id) => DB.authors.find(a => a.id === id),
+  getGenre:           (id) => DB.genres.find(g => g.id === id),
+  getUser:            (id) => DB.users.find(u => u.id === id),
+  getUserByEmail:     (email) => DB.users.find(u => u.email === email),
+  getBookWithDetails: (book) => ({
+    ...book,
+    autor:  DB.getAuthor(book.autor),
+    genero: DB.getGenre(book.genero),
+  }),
   getUserReservations: (user_id) =>
     DB.reservations
       .filter(r => r.user_id === user_id)
