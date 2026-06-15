@@ -42,9 +42,9 @@ class Libro(models.Model):
 
 class Reserva(models.Model):
     ESTADOS = [
-        ('activa',   'Activa'),
-        ('vencida',  'Vencida'),
-        ('cancelada','Cancelada'),
+        ('activa',    'Activa'),
+        ('vencida',   'Vencida'),
+        ('cancelada', 'Cancelada'),
     ]
     usuario          = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reservas')
     libro            = models.ForeignKey(Libro, on_delete=models.CASCADE, related_name='reservas')

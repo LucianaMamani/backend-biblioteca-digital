@@ -50,7 +50,7 @@ ROOT_URLCONF = 'biblioteca_digital.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -101,3 +101,10 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticatedOrReadOnly',
     ],
 }
+import os
+STATICFILES_DIRS = [BASE_DIR / 'static']
+STATIC_URL = '/static/'
+
+import os
+STATICFILES_DIRS = [BASE_DIR / 'static']
+STATIC_URL = '/static/'

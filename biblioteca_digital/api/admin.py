@@ -23,5 +23,3 @@ class ReservaAdmin(admin.ModelAdmin):
     list_display  = ('usuario', 'libro', 'fecha_reserva', 'fecha_devolucion', 'estado')
     list_filter   = ('estado',)
     search_fields = ('usuario__username', 'libro__titulo')
-
-# Register your models here.

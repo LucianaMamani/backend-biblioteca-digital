@@ -107,22 +107,15 @@
   <script>
     renderNav('catalogo');
 
-    const genreSelect = document.getElementById('filter-genre');
-    DB.genres.forEach(g => {
-      const opt = document.createElement('option');
-      opt.value = g.id; opt.textContent = g.nombre;
-      genreSelect.appendChild(opt);
-    });
-
     function renderBooks() {
       const query = document.getElementById('search-input').value.toLowerCase();
       const genre = document.getElementById('filter-genre').value;
       const avail = document.getElementById('filter-avail').value;
 
       let books = DB.books.map(DB.getBookWithDetails);
-      if (query) books = books.filter(b => b.titulo.toLowerCase().includes(query) || b.autor.nombre.toLowerCase().includes(query));
-      if (genre) books = books.filter(b => b.genero_id == genre);
-      if (avail !== '') books = books.filter(b => String(b.disponible) === avail);
+      if (query) books = books.filter(b => b.titulo.toLowerCase().includes(query) || b.autor && b.autor.nombre.toLowerCase().includes(query));
+      if (genre) books = books.filter(b => b.genero == genre);
+      if (avail !== '') books = books.filter(b => b.disponibilidad === (avail === 'true' ? 'disponible' : 'reservado'));
 
       const grid  = document.getElementById('books-grid');
       const empty = document.getElementById('empty-state');
@@ -131,69 +124,57 @@
       if (!books.length) { grid.innerHTML = ''; empty.classList.add('visible'); return; }
       empty.classList.remove('visible');
 
-      grid.innerHTML = books.map(b => `
+      const colores = ['#2a1c2a','#1e3040','#1a2e1a','#3d2b1f','#2d1e30','#1c2a3a'];
+      const emojis  = ['📕','📘','📗','📙','📓','📒'];
+
+      grid.innerHTML = books.map((b, i) => `
         <div class="book-card" onclick="openModal(${b.id})">
-          <div class="book-cover" style="background:${b.color}">${b.portada}</div>
-          <p class="book-genre">${b.genero.nombre}</p>
+          <div class="book-cover" style="background:${colores[i % colores.length]}">${emojis[i % emojis.length]}</div>
+          <p class="book-genre">${b.genero ? b.genero.nombre : ''}</p>
           <p class="book-title">${b.titulo}</p>
-          <p class="book-author">${b.autor.nombre}</p>
-          <span class="badge ${b.disponible ? 'badge-available' : 'badge-reserved'}">${b.disponible ? 'Disponible' : 'Reservado'}</span>
+          <p class="book-author">${b.autor ? b.autor.nombre + ' ' + b.autor.apellido : ''}</p>
+          <span class="badge badge-available">${b.disponibilidad}</span>
         </div>`).join('');
     }
 
     function openModal(bookId) {
-      const b    = DB.getBookWithDetails(DB.getBook(bookId));
-      const user = Auth.getUser();
+      const b = DB.getBookWithDetails(DB.getBook(bookId));
       document.getElementById('modal-header-content').innerHTML = `
-        <p class="book-genre">${b.genero.nombre}</p>
+        <p class="book-genre">${b.genero ? b.genero.nombre : ''}</p>
         <p style="font-family:var(--font-head);font-size:1.1rem;">${b.titulo}</p>`;
-
-      const canReserve = b.disponible && user && user.role === 'user';
-      const reserveBtn = canReserve
-        ? `<button class="btn btn-primary" onclick="reserveBook(${b.id})">Reservar libro</button>`
-        : !user
-          ? `<a href="login.html" class="btn btn-ghost">Iniciá sesión para reservar</a>`
-          : `<span class="badge badge-reserved" style="padding:.4rem .8rem;">No disponible</span>`;
 
       document.getElementById('modal-body').innerHTML = `
         <div class="modal-book-row">
-          <div class="modal-cover" style="background:${b.color}">${b.portada}</div>
+          <div class="modal-cover" style="background:#2a1c2a">📖</div>
           <div>
             <p class="modal-title">${b.titulo}</p>
-            <p class="modal-meta">Autor: <span>${b.autor.nombre}</span></p>
-            <p class="modal-meta">Género: <span>${b.genero.nombre}</span></p>
-            <p class="modal-meta">Año: <span>${b.anio}</span></p>
-            <p class="modal-meta">ISBN: <span>${b.isbn}</span></p>
+            <p class="modal-meta">Autor: <span>${b.autor ? b.autor.nombre + ' ' + b.autor.apellido : ''}</span></p>
+            <p class="modal-meta">Género: <span>${b.genero ? b.genero.nombre : ''}</span></p>
+            <p class="modal-meta">Año: <span>${b.anio_publicacion}</span></p>
           </div>
         </div>
-        <p class="modal-desc">${b.descripcion}</p>
-        <div class="modal-actions">${reserveBtn}</div>`;
+        <p class="modal-desc">${b.descripcion}</p>`;
 
       document.getElementById('modal').classList.add('open');
     }
 
     function closeModal() { document.getElementById('modal').classList.remove('open'); }
 
-    function reserveBook(bookId) {
-      const user = Auth.getUser();
-      if (!user) return;
-      const book = DB.getBook(bookId);
-      if (!book || !book.disponible) return;
-      book.disponible = false;
-      const today      = new Date().toISOString().split('T')[0];
-      const devolucion = new Date(Date.now() + 14*24*60*60*1000).toISOString().split('T')[0];
-      DB.reservations.push({ id: DB.reservations.length+1, user_id: user.id, book_id: bookId, fecha_reserva: today, fecha_devolucion: devolucion, estado: 'activa' });
-      closeModal();
-      renderBooks();
-      showToast(`"${book.titulo}" reservado exitosamente`);
-    }
-
     document.getElementById('search-input').addEventListener('input', debounce(renderBooks));
     document.getElementById('filter-genre').addEventListener('change', renderBooks);
     document.getElementById('filter-avail').addEventListener('change', renderBooks);
     document.getElementById('modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
 
-    renderBooks();
+    // Cargar datos desde la API y luego renderizar
+    DB.cargarDatos().then(() => {
+      const genreSelect = document.getElementById('filter-genre');
+      DB.genres.forEach(g => {
+        const opt = document.createElement('option');
+        opt.value = g.id; opt.textContent = g.nombre;
+        genreSelect.appendChild(opt);
+      });
+      renderBooks();
+    });
   </script>
 </body>
 </html>
