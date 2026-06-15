@@ -7,6 +7,9 @@ from .serializers import (
     AutorSerializer, GeneroSerializer, LibroSerializer,
     ReservaSerializer, UsuarioSerializer, RegisterSerializer
 )
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 class AutorViewSet(viewsets.ModelViewSet):
     queryset = Autor.objects.all()
@@ -76,3 +79,29 @@ class RegisterView(viewsets.GenericViewSet):
             user = serializer.save()
             return Response({'mensaje': 'Usuario creado correctamente', 'id': user.id})
         return Response(serializer.errors, status=400)
+    
+@api_view(['GET'])
+def me(request):
+    from rest_framework_simplejwt.authentication import JWTAuthentication
+    from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
+    
+    auth = JWTAuthentication()
+    try:
+        result = auth.authenticate(request)
+        if result is None:
+            return Response({'detail': 'Token no encontrado'}, status=401)
+        user, token = result
+    except (InvalidToken, TokenError) as e:
+        return Response({'detail': f'Token inválido: {str(e)}'}, status=401)
+
+    reservas = user.reservas.filter(estado='activa').values(
+        'id', 'libro__titulo', 'fecha_reserva', 'fecha_devolucion', 'estado'
+    )
+    return Response({
+        'id':       user.id,
+        'username': user.username,
+        'email':    user.email,
+        'nombre':   user.first_name or user.username,
+        'apellido': user.last_name,
+        'reservas': list(reservas),
+    })
