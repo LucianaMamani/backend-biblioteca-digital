@@ -78,26 +78,44 @@
           <input class="form-input" type="password" placeholder="Dejar vacío para no cambiar"/>
         </div>
         <button class="btn btn-primary" onclick="showToast('Perfil actualizado correctamente')">Guardar cambios</button>
-        <button class="btn btn-danger btn-sm" onclick="Auth.logout()" style="margin-left:.75rem;">Cerrar sesión</button>
+        <button class="btn btn-danger btn-sm" onclick="cerrarSesion()" style="margin-left:.75rem;">Cerrar sesión</button>
       </div>
     </div>
   </div>
 
-  <script src="../js/data.js"></script>
-  <script src="../js/utils.js"></script>
-  <script>
-    renderNav();
-    const user = Auth.getUser();
-    if (!user) window.location.href = 'login.html';
+ <script>
+  const API = 'http://127.0.0.1:8000/api';
+  const token = localStorage.getItem('access_token');
+  if (!token) window.location.href = 'login.html';
 
-    function init() {
-      document.getElementById('user-avatar').textContent = user.nombre.charAt(0).toUpperCase();
-      document.getElementById('user-name').textContent   = user.nombre;
+  function switchTab(id, btn) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + id).classList.add('active');
+  }
+
+  async function init() {
+    try {
+      // Obtener datos del usuario
+      const meRes = await fetch(`${API}/usuarios/me/`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!meRes.ok) { window.location.href = 'login.html'; return; }
+      const user = await meRes.json();
+
+      // Mostrar datos del usuario
+      document.getElementById('user-avatar').textContent = (user.first_name || user.username).charAt(0).toUpperCase();
+      document.getElementById('user-name').textContent   = `${user.first_name} ${user.last_name}`.trim() || user.username;
       document.getElementById('user-email').textContent  = user.email;
-      document.getElementById('prof-nombre').value = user.nombre;
+      document.getElementById('prof-nombre').value = `${user.first_name} ${user.last_name}`.trim();
       document.getElementById('prof-email').value  = user.email;
 
-      const reservas = DB.getUserReservations(user.id);
+      // Obtener reservas
+      const resRes = await fetch(`${API}/reservas/`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const reservas = await resRes.json();
       const activas  = reservas.filter(r => r.estado === 'activa').length;
       const pasadas  = reservas.filter(r => r.estado !== 'activa').length;
 
@@ -114,26 +132,30 @@
 
       document.getElementById('reservas-list').innerHTML = reservas.map(r => `
         <div class="res-card">
-          <div class="res-cover" style="background:${r.libro.color}">${r.libro.portada}</div>
+          <div class="res-cover" style="background:#1a1815">${r.libro_titulo ? r.libro_titulo.charAt(0) : '📖'}</div>
           <div class="res-info">
-            <p class="res-title">${r.libro.titulo}</p>
-            <p class="res-meta">${r.libro.autor.nombre} · Reservado el ${formatDate(r.fecha_reserva)}</p>
-            <p class="res-meta">Devolución: ${formatDate(r.fecha_devolucion)}</p>
+            <p class="res-title">${r.libro_titulo || 'Libro'}</p>
+            <p class="res-meta">Reservado el ${r.fecha_reserva}</p>
+            <p class="res-meta">Devolución: ${r.fecha_devolucion}</p>
           </div>
           <div class="res-state">
             <span class="badge ${r.estado === 'activa' ? 'badge-available' : 'badge-reserved'}">${r.estado === 'activa' ? 'Activa' : 'Vencida'}</span>
           </div>
         </div>`).join('');
-    }
 
-    function switchTab(id, btn) {
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-      btn.classList.add('active');
-      document.getElementById('tab-' + id).classList.add('active');
+    } catch(err) {
+      console.error('Error:', err);
     }
+  }
 
-    init();
-  </script>
+  function cerrarSesion() {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('user_data');
+    window.location.href = 'login.html';
+  }
+
+  init();
+</script>
 </body>
 </html>

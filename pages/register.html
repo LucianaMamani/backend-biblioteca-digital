@@ -64,53 +64,69 @@
     <p class="auth-footer">¿Ya tenés cuenta? <a href="login.html">Iniciá sesión</a></p>
   </div>
 
-  <script src="../js/data.js"></script>
-  <script src="../js/utils.js"></script>
+   src="../js/data.js"></script>
   <script>
-    if (Auth.isLoggedIn()) window.location.href = 'panel-usuario.html';
+  const token = localStorage.getItem('access_token');
+  if (token) window.location.href = 'panel-usuario.html';
 
-    document.getElementById('reg-form').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const nombre   = document.getElementById('nombre').value.trim();
-      const apellido = document.getElementById('apellido').value.trim();
-      const email    = document.getElementById('email').value.trim();
-      const pass     = document.getElementById('password').value;
-      const pass2    = document.getElementById('password2').value;
-      let valid = true;
+  document.getElementById('reg-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const nombre    = document.getElementById('nombre').value.trim();
+    const apellido  = document.getElementById('apellido').value.trim();
+    const email     = document.getElementById('email').value.trim();
+    const password  = document.getElementById('password').value;
+    const password2 = document.getElementById('password2').value;
+    const errG      = document.getElementById('err-general');
+    const errP2     = document.getElementById('err-pass2');
 
-      ['err-nombre','err-email','err-pass','err-pass2','err-general'].forEach(id => {
-        const el = document.getElementById(id);
-        el.textContent = ''; el.classList.remove('visible');
+    errG.classList.remove('visible');
+    errP2.classList.remove('visible');
+
+    if (password !== password2) {
+      errP2.textContent = 'Las contraseñas no coinciden.';
+      errP2.classList.add('visible');
+      return;
+    }
+
+    try {
+      const res = await fetch('http://127.0.0.1:8000/api/auth/register/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username:   email,
+          email:      email,
+          password:   password,
+          first_name: nombre,
+          last_name:  apellido
+        })
       });
 
-      if (!nombre) {
-        document.getElementById('err-nombre').textContent = 'El nombre es requerido.';
-        document.getElementById('err-nombre').classList.add('visible'); valid = false;
-      }
-      if (!/\S+@\S+\.\S+/.test(email)) {
-        document.getElementById('err-email').textContent = 'Correo inválido.';
-        document.getElementById('err-email').classList.add('visible'); valid = false;
-      }
-      if (DB.getUserByEmail(email)) {
-        document.getElementById('err-email').textContent = 'Este correo ya está registrado.';
-        document.getElementById('err-email').classList.add('visible'); valid = false;
-      }
-      if (pass.length < 6) {
-        document.getElementById('err-pass').textContent = 'Mínimo 6 caracteres.';
-        document.getElementById('err-pass').classList.add('visible'); valid = false;
-      }
-      if (pass !== pass2) {
-        document.getElementById('err-pass2').textContent = 'Las contraseñas no coinciden.';
-        document.getElementById('err-pass2').classList.add('visible'); valid = false;
-      }
-      if (!valid) return;
+      const data = await res.json();
 
-      const newUser = { id: DB.users.length + 1, nombre: `${nombre} ${apellido}`, email, password: pass, role: 'user' };
-      DB.users.push(newUser);
-      Auth.login({ id: newUser.id, nombre: newUser.nombre, email: newUser.email, role: 'user' });
-      showToast('¡Cuenta creada exitosamente!');
-      setTimeout(() => window.location.href = 'panel-usuario.html', 1000);
-    });
-  </script>
+      if (!res.ok) {
+        errG.textContent = data.username?.[0] || data.email?.[0] || 'Error al registrarse.';
+        errG.classList.add('visible');
+        return;
+      }
+
+      // Registro exitoso → hacer login automático
+      const loginRes = await fetch('http://127.0.0.1:8000/api/token/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: email, password })
+      });
+      const loginData = await loginRes.json();
+      localStorage.setItem('access_token', loginData.access);
+      localStorage.setItem('refresh_token', loginData.refresh);
+      localStorage.setItem('user_data', JSON.stringify({ first_name: nombre, is_staff: false }));
+
+      window.location.href = 'panel-usuario.html';
+
+    } catch (err) {
+      errG.textContent = 'Error de conexión. Verificá que el servidor esté corriendo.';
+      errG.classList.add('visible');
+    }
+  });
+</script>
 </body>
 </html>

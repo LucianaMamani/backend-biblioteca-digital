@@ -13,4 +13,5 @@ router.register(r'auth',     views.RegisterView,   basename='auth')
 urlpatterns = [
     path('perfil/me/', views.me, name='usuario-me'),
     path('', include(router.urls)),
+    path('usuarios/me/', views.me, name='me'),
 ]
