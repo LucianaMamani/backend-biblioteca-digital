@@ -1,0 +1,54 @@
+[33mcommit 4fec708c797d4f35833ca9d58737da2cd1b1d4eb[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: Marianoabizanda <mariano.abizanda@gmail.com>
+Date:   Mon Jun 15 20:34:57 2026 -0300
+
+    Panel de usuario, datos reales
+
+[1mdiff --git a/biblioteca_digital/api/views.py b/biblioteca_digital/api/views.py[m
+[1mindex 0142a26..58f7398 100644[m
+[1m--- a/biblioteca_digital/api/views.py[m
+[1m+++ b/biblioteca_digital/api/views.py[m
+[36m@@ -7,6 +7,9 @@[m [mfrom .serializers import ([m
+     AutorSerializer, GeneroSerializer, LibroSerializer,[m
+     ReservaSerializer, UsuarioSerializer, RegisterSerializer[m
+ )[m
+[32m+[m[32mfrom rest_framework.decorators import api_view, permission_classes[m
+[32m+[m[32mfrom rest_framework.permissions import IsAuthenticated[m
+[32m+[m[32mfrom rest_framework_simplejwt.authentication import JWTAuthentication[m
+ [m
+ class AutorViewSet(viewsets.ModelViewSet):[m
+     queryset = Autor.objects.all()[m
+[36m@@ -75,4 +78,30 @@[m [mclass RegisterView(viewsets.GenericViewSet):[m
+         if serializer.is_valid():[m
+             user = serializer.save()[m
+             return Response({'mensaje': 'Usuario creado correctamente', 'id': user.id})[m
+[31m-        return Response(serializer.errors, status=400)[m
+\ No newline at end of file[m
+[32m+[m[32m        return Response(serializer.errors, status=400)[m
+[32m+[m[41m    [m
+[32m+[m[32m@api_view(['GET'])[m
+[32m+[m[32mdef me(request):[m
+[32m+[m[32m    from rest_framework_simplejwt.authentication import JWTAuthentication[m
+[32m+[m[32m    from rest_framework_simplejwt.exceptions import InvalidToken, TokenError[m
+[32m+[m[41m    [m
+[32m+[m[32m    auth = JWTAuthentication()[m
+[32m+[m[32m    try:[m
+[32m+[m[32m        result = auth.authenticate(request)[m
+[32m+[m[32m        if result is None:[m
+[32m+[m[32m            return Response({'detail': 'Token no encontrado'}, status=401)[m
+[32m+[m[32m        user, token = result[m
+[32m+[m[32m    except (InvalidToken, TokenError) as e:[m
+[32m+[m[32m        return Response({'detail': f'Token inválido: {str(e)}'}, status=401)[m
+[32m+[m
+[32m+[m[32m    reservas = user.reservas.filter(estado='activa').values([m
+[32m+[m[32m        'id', 'libro__titulo', 'fecha_reserva', 'fecha_devolucion', 'estado'[m
+[32m+[m[32m    )[m
+[32m+[m[32m    return Response({[m
+[32m+[m[32m        'id':       user.id,[m
+[32m+[m[32m        'username': user.username,[m
+[32m+[m[32m        'email':    user.email,[m
+[32m+[m[32m        'nombre':   user.first_name or user.username,[m
+[32m+[m[32m        'apellido': user.last_name,[m
+[32m+[m[32m        'reservas': list(reservas),[m
+[32m+[m[32m    })[m
+\ No newline at end of file[m

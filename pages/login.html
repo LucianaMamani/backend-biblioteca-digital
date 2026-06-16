@@ -70,12 +70,8 @@
   </div>
 
   <script>
-  // Si ya está logueado, redirigir
-  const token = localStorage.getItem('access_token');
-  if (token) {
-    const userData = JSON.parse(localStorage.getItem('user_data') || '{}');
-    window.location.href = userData.is_staff ? 'panel-admin.html' : 'panel-usuario.html';
-  }
+  const token = localStorage.getItem('access');
+  if (token) window.location.href = 'panel-usuario.html';
 
   document.getElementById('login-form').addEventListener('submit', async function(e) {
     e.preventDefault();
@@ -85,7 +81,7 @@
     errG.classList.remove('visible');
 
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/token/', {
+      const res = await fetch('/api/token/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: email, password })
@@ -94,23 +90,14 @@
       const data = await res.json();
 
       if (!res.ok) {
-        errG.textContent = 'Correo o contraseña incorrectos.';
+        errG.textContent = 'Usuario o contraseña incorrectos.';
         errG.classList.add('visible');
         return;
       }
 
-      // Guardar tokens
-      localStorage.setItem('access_token', data.access);
-      localStorage.setItem('refresh_token', data.refresh);
-
-      // Obtener datos del usuario
-      const meRes = await fetch('http://127.0.0.1:8000/api/usuarios/me/', {
-        headers: { 'Authorization': `Bearer ${data.access}` }
-      });
-      const me = await meRes.json();
-      localStorage.setItem('user_data', JSON.stringify(me));
-
-      window.location.href = me.is_staff ? 'panel-admin.html' : 'panel-usuario.html';
+      localStorage.setItem('access', data.access);
+      localStorage.setItem('refresh', data.refresh);
+      window.location.href = 'panel-usuario.html';
 
     } catch (err) {
       errG.textContent = 'Error de conexión. Verificá que el servidor esté corriendo.';
