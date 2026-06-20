@@ -27,6 +27,7 @@ class ReservaSerializer(serializers.ModelSerializer):
     class Meta:
         model  = Reserva
         fields = '__all__'
+        read_only_fields = ('usuario', 'fecha_reserva', 'estado')
 
 class UsuarioSerializer(serializers.ModelSerializer):
     class Meta:
