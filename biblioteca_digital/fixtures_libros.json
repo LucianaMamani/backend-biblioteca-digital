@@ -1,0 +1,62 @@
+[
+{
+  "model": "api.autor",
+  "pk": 1,
+  "fields": {
+    "nombre": "Gabriel Garcia Marquez",
+    "nacionalidad": "Colombiano",
+    "bio": "x"
+  }
+},
+{
+  "model": "api.autor",
+  "pk": 2,
+  "fields": {
+    "nombre": "Ernesto Sábato",
+    "nacionalidad": "Argentina",
+    "bio": "x"
+  }
+},
+{
+  "model": "api.genero",
+  "pk": 1,
+  "fields": {
+    "nombre": "Romance"
+  }
+},
+{
+  "model": "api.genero",
+  "pk": 2,
+  "fields": {
+    "nombre": "Novela"
+  }
+},
+{
+  "model": "api.libro",
+  "pk": 1,
+  "fields": {
+    "titulo": "El amor en los tiempos del cólera",
+    "autor": 1,
+    "genero": 1,
+    "anio": 1985,
+    "isbn": "978-0307389732",
+    "descripcion": "Una historia de amor que perdura más de cincuenta años entre Florentino Ariza y Fermina Daza.",
+    "disponible": false,
+    "portada": "📖"
+  }
+},
+{
+  "model": "api.libro",
+  "pk": 2,
+  "fields": {
+    "titulo": "El túnel",
+    "autor": 2,
+    "genero": 2,
+    "anio": 1948,
+    "isbn": "978-9500728182",
+    "descripcion": "La confesión de un pintor que narra el origen de su obsesión asesina hacia una mujer.",
+    "disponible": true,
+    "portada": "📖"
+  }
+}
+]
