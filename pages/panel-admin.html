@@ -202,8 +202,8 @@
   <script src="../js/utils.js"></script>
   <script>
     renderNav();
-    const user = Auth.getUser();
-    if (!user || user.role !== 'admin') window.location.href = 'login.html';
+    const token = localStorage.getItem('access');
+    if (!token) window.location.href = 'login.html';
 
     let currentModal = null;
 
@@ -234,47 +234,60 @@
     }
 
     // ── DASHBOARD ──
-    function renderDashboard() {
-      const avail = DB.books.filter(b => b.disponible).length;
-      document.getElementById('dash-stats').innerHTML = `
-        <div class="stat-card"><p class="stat-num">${DB.books.length}</p><p class="stat-lbl">Libros</p></div>
-        <div class="stat-card"><p class="stat-num">${avail}</p><p class="stat-lbl">Disponibles</p></div>
-        <div class="stat-card"><p class="stat-num">${DB.reservations.length}</p><p class="stat-lbl">Reservas</p></div>
-        <div class="stat-card"><p class="stat-num">${DB.users.length}</p><p class="stat-lbl">Usuarios</p></div>`;
+    async function renderDashboard() {
+      const token = localStorage.getItem('access');
+      const [librosRes, reservasRes, usuariosRes] = await Promise.all([
+        fetch('/api/libros/', { headers: { 'Authorization': 'Bearer ' + token } }),
+        fetch('/api/reservas/', { headers: { 'Authorization': 'Bearer ' + token } }),
+        fetch('/api/usuarios/', { headers: { 'Authorization': 'Bearer ' + token } })
+      ]);
+      const libros = await librosRes.json();
+      const reservas = await reservasRes.json();
+      const usuarios = await usuariosRes.json();
 
-      const rows = DB.reservations.slice(-5).reverse().map(r => {
-        const b = DB.getBook(r.book_id);
-        const u = DB.getUser(r.user_id);
-        return `<tr>
-          <td>${b ? b.titulo : '—'}</td>
-          <td>${u ? u.nombre : '—'}</td>
-          <td>${formatDate(r.fecha_reserva)}</td>
+      const avail = libros.filter(b => b.disponible).length;
+      document.getElementById('dash-stats').innerHTML = `
+        <div class="stat-card"><p class="stat-num">${libros.length}</p><p class="stat-lbl">Libros</p></div>
+        <div class="stat-card"><p class="stat-num">${avail}</p><p class="stat-lbl">Disponibles</p></div>
+        <div class="stat-card"><p class="stat-num">${reservas.length}</p><p class="stat-lbl">Reservas</p></div>
+        <div class="stat-card"><p class="stat-num">${usuarios.length}</p><p class="stat-lbl">Usuarios</p></div>`;
+
+      const rows = reservas.slice(-5).reverse().map(r => `
+        <tr>
+          <td>${r.libro_titulo || '—'}</td>
+          <td>${r.usuario_nombre || '—'}</td>
+          <td>${r.fecha_reserva}</td>
           <td><span class="badge ${r.estado === 'activa' ? 'badge-available' : 'badge-reserved'}">${r.estado}</span></td>
-        </tr>`;
-      }).join('');
+        </tr>`).join('');
 
       document.getElementById('dash-reservas-table').innerHTML = `
         <thead><tr><th>Libro</th><th>Usuario</th><th>Fecha</th><th>Estado</th></tr></thead>
         <tbody>${rows}</tbody>`;
     }
 
+    
     // ── LIBROS ──
-    function renderLibros() {
-      const rows = DB.books.map(b => {
-        const a = DB.getAuthor(b.autor_id);
-        const g = DB.getGenre(b.genero_id);
-        return `<tr>
-          <td>${b.portada} ${b.titulo}</td>
-          <td>${a ? a.nombre : '—'}</td>
-          <td>${g ? g.nombre : '—'}</td>
-          <td>${b.anio}</td>
+    let cacheLibros = [];
+
+    async function renderLibros() {
+      const token = localStorage.getItem('access');
+      const res = await fetch('/api/libros/', {
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      cacheLibros = await res.json();
+
+      const rows = cacheLibros.map(b => `
+        <tr>
+          <td>${b.portada || '📖'} ${b.titulo}</td>
+          <td>${b.autor_nombre || '—'}</td>
+          <td>${b.genero_nombre || '—'}</td>
+          <td>${b.anio || ''}</td>
           <td><span class="badge ${b.disponible ? 'badge-available' : 'badge-reserved'}">${b.disponible ? 'Disponible' : 'Reservado'}</span></td>
           <td>
             <button class="action-btn action-edit" onclick="openModal('libro',${b.id})">Editar</button>
             <button class="action-btn action-del"  onclick="deleteItem('libro',${b.id})">Eliminar</button>
           </td>
-        </tr>`;
-      }).join('');
+        </tr>`).join('');
 
       document.getElementById('libros-table').innerHTML = `
         <thead><tr><th>Título</th><th>Autor</th><th>Género</th><th>Año</th><th>Estado</th><th>Acciones</th></tr></thead>
@@ -282,12 +295,19 @@
     }
 
     // ── AUTORES ──
-    function renderAutores() {
-      const rows = DB.authors.map(a => `
+    let cacheAutores = [];
+
+    async function renderAutores() {
+      const token = localStorage.getItem('access');
+      const res = await fetch('/api/autores/', {
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      cacheAutores = await res.json();
+
+      const rows = cacheAutores.map(a => `
         <tr>
           <td>${a.nombre}</td>
-          <td>${a.nacionalidad}</td>
-          <td>${DB.books.filter(b => b.autor_id === a.id).length} libros</td>
+          <td>${a.nacionalidad || '—'}</td>
           <td>
             <button class="action-btn action-edit" onclick="openModal('autor',${a.id})">Editar</button>
             <button class="action-btn action-del"  onclick="deleteItem('autor',${a.id})">Eliminar</button>
@@ -295,16 +315,23 @@
         </tr>`).join('');
 
       document.getElementById('autores-table').innerHTML = `
-        <thead><tr><th>Nombre</th><th>Nacionalidad</th><th>Libros</th><th>Acciones</th></tr></thead>
+        <thead><tr><th>Nombre</th><th>Nacionalidad</th><th>Acciones</th></tr></thead>
         <tbody>${rows}</tbody>`;
     }
 
     // ── GENEROS ──
-    function renderGeneros() {
-      const rows = DB.genres.map(g => `
+    let cacheGeneros = [];
+
+    async function renderGeneros() {
+      const token = localStorage.getItem('access');
+      const res = await fetch('/api/generos/', {
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      cacheGeneros = await res.json();
+
+      const rows = cacheGeneros.map(g => `
         <tr>
           <td>${g.nombre}</td>
-          <td>${DB.books.filter(b => b.genero_id === g.id).length} libros</td>
           <td>
             <button class="action-btn action-edit" onclick="openModal('genero',${g.id})">Editar</button>
             <button class="action-btn action-del"  onclick="deleteItem('genero',${g.id})">Eliminar</button>
@@ -312,24 +339,27 @@
         </tr>`).join('');
 
       document.getElementById('generos-table').innerHTML = `
-        <thead><tr><th>Nombre</th><th>Libros</th><th>Acciones</th></tr></thead>
+        <thead><tr><th>Nombre</th><th>Acciones</th></tr></thead>
         <tbody>${rows}</tbody>`;
     }
 
     // ── RESERVAS ──
-    function renderReservas() {
-      const rows = DB.reservations.map(r => {
-        const b = DB.getBook(r.book_id);
-        const u = DB.getUser(r.user_id);
-        return `<tr>
-          <td>${b ? b.titulo : '—'}</td>
-          <td>${u ? u.nombre : '—'}</td>
-          <td>${formatDate(r.fecha_reserva)}</td>
-          <td>${formatDate(r.fecha_devolucion)}</td>
+    async function renderReservas() {
+      const token = localStorage.getItem('access');
+      const res = await fetch('/api/reservas/', {
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      const reservas = await res.json();
+
+      const rows = reservas.map(r => `
+        <tr>
+          <td>${r.libro_titulo || '—'}</td>
+          <td>${r.usuario_nombre || '—'}</td>
+          <td>${r.fecha_reserva}</td>
+          <td>${r.fecha_devolucion}</td>
           <td><span class="badge ${r.estado === 'activa' ? 'badge-available' : 'badge-reserved'}">${r.estado}</span></td>
           <td><button class="action-btn action-del" onclick="deleteItem('reserva',${r.id})">Cancelar</button></td>
-        </tr>`;
-      }).join('');
+        </tr>`).join('');
 
       document.getElementById('reservas-table').innerHTML = `
         <thead><tr><th>Libro</th><th>Usuario</th><th>Reserva</th><th>Devolución</th><th>Estado</th><th></th></tr></thead>
@@ -337,23 +367,28 @@
     }
 
     // ── USUARIOS ──
-    function renderUsuarios() {
-      const rows = DB.users.map(u => `
+    async function renderUsuarios() {
+      const token = localStorage.getItem('access');
+      const res = await fetch('/api/usuarios/', {
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      const usuarios = await res.json();
+
+      const rows = usuarios.map(u => `
         <tr>
-          <td>${u.nombre}</td>
+          <td>${u.first_name || u.username}</td>
           <td>${u.email}</td>
-          <td><span class="badge ${u.role === 'admin' ? 'badge-admin' : 'badge-user'}">${u.role}</span></td>
-          <td>${DB.reservations.filter(r => r.user_id === u.id).length} reservas</td>
+          <td><span class="badge ${u.is_staff ? 'badge-admin' : 'badge-user'}">${u.is_staff ? 'admin' : 'usuario'}</span></td>
           <td><button class="action-btn action-del" onclick="deleteItem('usuario',${u.id})">Eliminar</button></td>
         </tr>`).join('');
 
       document.getElementById('usuarios-table').innerHTML = `
-        <thead><tr><th>Nombre</th><th>Email</th><th>Rol</th><th>Actividad</th><th></th></tr></thead>
+        <thead><tr><th>Nombre</th><th>Email</th><th>Rol</th><th></th></tr></thead>
         <tbody>${rows}</tbody>`;
     }
 
     // ── MODAL FORMS ──
-    function openModal(type, id = null) {
+    async function openModal(type, id = null) {
       currentModal = { type, id };
       const map = { libro: 'Libro', autor: 'Autor', genero: 'Género' };
       document.getElementById('modal-title').textContent = (id ? 'Editar ' : 'Agregar ') + (map[type] || type);
@@ -361,12 +396,20 @@
       let html = '';
 
       if (type === 'libro') {
-        const b = id ? DB.getBook(id) : {};
-        const authorOpts = DB.authors.map(a =>
-          `<option value="${a.id}" ${b.autor_id === a.id ? 'selected' : ''}>${a.nombre}</option>`
+        const b = id ? cacheLibros.find(x => x.id === id) : {};
+        const token = localStorage.getItem('access');
+        const [autoresRes, generosRes] = await Promise.all([
+          fetch('/api/autores/', { headers: { 'Authorization': 'Bearer ' + token } }),
+          fetch('/api/generos/', { headers: { 'Authorization': 'Bearer ' + token } })
+        ]);
+        const autores = await autoresRes.json();
+        const generos = await generosRes.json();
+
+        const authorOpts = autores.map(a =>
+          `<option value="${a.id}" ${b.autor === a.id ? 'selected' : ''}>${a.nombre}</option>`
         ).join('');
-        const genreOpts = DB.genres.map(g =>
-          `<option value="${g.id}" ${b.genero_id === g.id ? 'selected' : ''}>${g.nombre}</option>`
+        const genreOpts = generos.map(g =>
+          `<option value="${g.id}" ${b.genero === g.id ? 'selected' : ''}>${g.nombre}</option>`
         ).join('');
         html = `
           <div class="form-group">
@@ -395,7 +438,7 @@
           </div>`;
 
       } else if (type === 'autor') {
-        const a = id ? DB.getAuthor(id) : {};
+        const a = id ? cacheAutores.find(x => x.id === id) : {};
         html = `
           <div class="form-group">
             <label class="form-label">Nombre</label>
@@ -411,7 +454,7 @@
           </div>`;
 
       } else if (type === 'genero') {
-        const g = id ? DB.getGenre(id) : {};
+        const g = id ? cacheGeneros.find(x => x.id === id) : {};
         html = `
           <div class="form-group">
             <label class="form-label">Nombre del género</label>
@@ -428,77 +471,159 @@
       currentModal = null;
     }
 
-    function saveForm() {
+    async function saveForm() {
       if (!currentModal) return;
       const { type, id } = currentModal;
 
       if (type === 'libro') {
         const titulo = document.getElementById('f-titulo').value.trim();
         if (!titulo) { showToast('El título es requerido', 'error'); return; }
-        if (id) {
-          const b = DB.getBook(id);
-          b.titulo      = titulo;
-          b.autor_id    = +document.getElementById('f-autor').value;
-          b.genero_id   = +document.getElementById('f-genero').value;
-          b.anio        = +document.getElementById('f-anio').value;
-          b.isbn        = document.getElementById('f-isbn').value;
-          b.descripcion = document.getElementById('f-desc').value;
-        } else {
-          DB.books.push({
-            id: DB.books.length + 1,
-            titulo,
-            autor_id:    +document.getElementById('f-autor').value,
-            genero_id:   +document.getElementById('f-genero').value,
-            anio:        +document.getElementById('f-anio').value,
-            isbn:         document.getElementById('f-isbn').value,
-            descripcion:  document.getElementById('f-desc').value,
-            disponible: true,
-            portada: '📖',
-            color: '#2a2020'
-          });
+
+        const token = localStorage.getItem('access');
+        const payload = {
+          titulo,
+          autor:       +document.getElementById('f-autor').value,
+          genero:      +document.getElementById('f-genero').value,
+          anio:        +document.getElementById('f-anio').value,
+          isbn:         document.getElementById('f-isbn').value,
+          descripcion:  document.getElementById('f-desc').value,
+          disponible:  true,
+          portada:     '📖'
+        };
+
+        const url = id ? `/api/libros/${id}/` : '/api/libros/';
+        const method = id ? 'PUT' : 'POST';
+
+        const res = await fetch(url, {
+          method,
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          showToast('Error al guardar: ' + JSON.stringify(err), 'error');
+          return;
         }
-        renderLibros();
+
+        await renderLibros();
 
       } else if (type === 'autor') {
         const nombre = document.getElementById('f-nombre').value.trim();
         if (!nombre) { showToast('El nombre es requerido', 'error'); return; }
-        if (id) {
-          const a = DB.getAuthor(id);
-          a.nombre       = nombre;
-          a.nacionalidad = document.getElementById('f-nac').value;
-          a.bio          = document.getElementById('f-bio').value;
-        } else {
-          DB.authors.push({
-            id: DB.authors.length + 1,
-            nombre,
-            nacionalidad: document.getElementById('f-nac').value,
-            bio:          document.getElementById('f-bio').value
-          });
+
+        const token = localStorage.getItem('access');
+        const payload = {
+          nombre,
+          nacionalidad: document.getElementById('f-nac').value,
+          bio:          document.getElementById('f-bio').value
+        };
+
+        const url = id ? `/api/autores/${id}/` : '/api/autores/';
+        const method = id ? 'PUT' : 'POST';
+
+        const res = await fetch(url, {
+          method,
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          showToast('Error al guardar: ' + JSON.stringify(err), 'error');
+          return;
         }
-        renderAutores();
+
+        await renderAutores();
 
       } else if (type === 'genero') {
         const nombre = document.getElementById('f-gnombre').value.trim();
         if (!nombre) { showToast('El nombre es requerido', 'error'); return; }
-        if (id) {
-          DB.getGenre(id).nombre = nombre;
-        } else {
-          DB.genres.push({ id: DB.genres.length + 1, nombre });
+
+        const token = localStorage.getItem('access');
+        const url = id ? `/api/generos/${id}/` : '/api/generos/';
+        const method = id ? 'PUT' : 'POST';
+
+        const res = await fetch(url, {
+          method,
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+          },
+          body: JSON.stringify({ nombre })
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          showToast('Error al guardar: ' + JSON.stringify(err), 'error');
+          return;
         }
-        renderGeneros();
+
+        await renderGeneros();
       }
 
       closeModal();
       showToast('Guardado correctamente');
     }
 
-    function deleteItem(type, id) {
+    async function deleteItem(type, id) {
       if (!confirm('¿Confirmás la eliminación?')) return;
-      if (type === 'libro')   { DB.books        = DB.books.filter(x => x.id !== id);        renderLibros();   }
-      if (type === 'autor')   { DB.authors      = DB.authors.filter(x => x.id !== id);      renderAutores();  }
-      if (type === 'genero')  { DB.genres       = DB.genres.filter(x => x.id !== id);       renderGeneros();  }
-      if (type === 'reserva') { DB.reservations = DB.reservations.filter(x => x.id !== id); renderReservas(); }
-      if (type === 'usuario') { DB.users        = DB.users.filter(x => x.id !== id);        renderUsuarios(); }
+      if (type === 'libro') {
+        const token = localStorage.getItem('access');
+        await fetch(`/api/libros/${id}/`, {
+          method: 'DELETE',
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        await renderLibros();
+        showToast('Eliminado correctamente');
+        return;
+      }
+      if (type === 'autor') {
+        const token = localStorage.getItem('access');
+        await fetch(`/api/autores/${id}/`, {
+          method: 'DELETE',
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        await renderAutores();
+        showToast('Eliminado correctamente');
+        return;
+      }
+      if (type === 'genero') {
+        const token = localStorage.getItem('access');
+        await fetch(`/api/generos/${id}/`, {
+          method: 'DELETE',
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        await renderGeneros();
+        showToast('Eliminado correctamente');
+        return;
+      }
+      if (type === 'reserva') {
+        const token = localStorage.getItem('access');
+        await fetch(`/api/reservas/${id}/`, {
+          method: 'DELETE',
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        await renderReservas();
+        showToast('Reserva cancelada');
+        return;
+      }
+      if (type === 'usuario') {
+        const token = localStorage.getItem('access');
+        await fetch(`/api/usuarios/${id}/`, {
+          method: 'DELETE',
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        await renderUsuarios();
+        showToast('Usuario eliminado');
+        return;
+      }
       showToast('Eliminado correctamente');
     }
 
