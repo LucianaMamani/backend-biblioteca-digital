@@ -1,15 +1,15 @@
 from rest_framework import viewsets, permissions
-from rest_framework.decorators import action
+from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from django.contrib.auth.models import User
 from .models import Autor, Genero, Libro, Reserva
 from .serializers import (
     AutorSerializer, GeneroSerializer, LibroSerializer,
     ReservaSerializer, UsuarioSerializer, RegisterSerializer
 )
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
-from rest_framework_simplejwt.authentication import JWTAuthentication
 
 class AutorViewSet(viewsets.ModelViewSet):
     queryset = Autor.objects.all()
@@ -28,9 +28,9 @@ class LibroViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = Libro.objects.all()
-        genero   = self.request.query_params.get('genero')
-        autor    = self.request.query_params.get('autor')
-        buscar   = self.request.query_params.get('buscar')
+        genero     = self.request.query_params.get('genero')
+        autor      = self.request.query_params.get('autor')
+        buscar     = self.request.query_params.get('buscar')
         disponible = self.request.query_params.get('disponible')
         if genero:
             queryset = queryset.filter(genero__id=genero)
@@ -79,12 +79,9 @@ class RegisterView(viewsets.GenericViewSet):
             user = serializer.save()
             return Response({'mensaje': 'Usuario creado correctamente', 'id': user.id})
         return Response(serializer.errors, status=400)
-    
+
 @api_view(['GET'])
 def me(request):
-    from rest_framework_simplejwt.authentication import JWTAuthentication
-    from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
-    
     auth = JWTAuthentication()
     try:
         result = auth.authenticate(request)
@@ -101,6 +98,9 @@ def me(request):
         'id':       user.id,
         'username': user.username,
         'email':    user.email,
+        'first_name': user.first_name,
+        'last_name':  user.last_name,
+        'is_staff': user.is_staff,
         'nombre':   user.first_name or user.username,
         'apellido': user.last_name,
         'reservas': list(reservas),

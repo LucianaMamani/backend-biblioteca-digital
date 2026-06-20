@@ -64,67 +64,67 @@
     <p class="auth-footer">¿Ya tenés cuenta? <a href="login.html">Iniciá sesión</a></p>
   </div>
 
-  <script src="../js/data.js"></script>
-  <script src="../js/utils.js"></script>
-<script>
+<script src="../js/utils.js"></script>
+  <script>
+  const token = localStorage.getItem('access');
+  if (token) window.location.href = 'panel-usuario.html';
+
   document.getElementById('reg-form').addEventListener('submit', async function(e) {
     e.preventDefault();
-    const nombre   = document.getElementById('nombre').value.trim();
-    const apellido = document.getElementById('apellido').value.trim();
-    const email    = document.getElementById('email').value.trim();
-    const pass     = document.getElementById('password').value;
-    const pass2    = document.getElementById('password2').value;
+    const nombre    = document.getElementById('nombre').value.trim();
+    const apellido  = document.getElementById('apellido').value.trim();
+    const email     = document.getElementById('email').value.trim();
+    const password  = document.getElementById('password').value;
+    const password2 = document.getElementById('password2').value;
+    const errG      = document.getElementById('err-general');
+    const errP2     = document.getElementById('err-pass2');
 
-    ['err-nombre','err-email','err-pass','err-pass2','err-general'].forEach(id => {
-      const el = document.getElementById(id);
-      el.textContent = ''; el.classList.remove('visible');
-    });
+    errG.classList.remove('visible');
+    errP2.classList.remove('visible');
 
-    let valid = true;
-    if (!nombre) {
-      document.getElementById('err-nombre').textContent = 'El nombre es requerido.';
-      document.getElementById('err-nombre').classList.add('visible'); valid = false;
-    }
-    if (pass.length < 6) {
-      document.getElementById('err-pass').textContent = 'Mínimo 6 caracteres.';
-      document.getElementById('err-pass').classList.add('visible'); valid = false;
-    }
-    if (pass !== pass2) {
-      document.getElementById('err-pass2').textContent = 'Las contraseñas no coinciden.';
-      document.getElementById('err-pass2').classList.add('visible'); valid = false;
-    }
-    if (!valid) return;
-
-    const res = await fetch('/api/auth/register/', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        username:   email,
-        email:      email,
-        password:   pass,
-        first_name: nombre,
-        last_name:  apellido
-      })
-    });
-
-    if (!res.ok) {
-      const err = await res.json();
-      document.getElementById('err-general').textContent = err.username?.[0] || 'Error al registrarse.';
-      document.getElementById('err-general').classList.add('visible');
+    if (password !== password2) {
+      errP2.textContent = 'Las contraseñas no coinciden.';
+      errP2.classList.add('visible');
       return;
     }
 
-    // Login automático después del registro
-    const loginRes = await fetch('/api/token/', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username: email, password: pass })
-    });
+    try {
+      const res = await fetch('/api/auth/register/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username:   email,
+          email:      email,
+          password:   password,
+          first_name: nombre,
+          last_name:  apellido
+        })
+      });
 
-    const data = await loginRes.json();
-    localStorage.setItem('access', data.access);
-    localStorage.setItem('refresh', data.refresh);
-    window.location.href = 'panel-usuario.html';
+      const data = await res.json();
+
+      if (!res.ok) {
+        errG.textContent = data.username?.[0] || data.email?.[0] || 'Error al registrarse.';
+        errG.classList.add('visible');
+        return;
+      }
+
+      // Registro exitoso → hacer login automático
+      const loginRes = await fetch('/api/token/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: email, password })
+      });
+      const loginData = await loginRes.json();
+      localStorage.setItem('access', loginData.access);
+      localStorage.setItem('refresh', loginData.refresh);
+
+      window.location.href = 'panel-usuario.html';
+
+    } catch (err) {
+      errG.textContent = 'Error de conexión. Verificá que el servidor esté corriendo.';
+      errG.classList.add('visible');
+    }
   });
 </script>
 </body>
