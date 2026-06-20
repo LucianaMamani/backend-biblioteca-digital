@@ -144,6 +144,18 @@
       <p class="book-genre">${b.genero_nombre || ''}</p>
       <p style="font-family:var(--font-head);font-size:1.1rem;">${b.titulo}</p>`;
 
+    const token = localStorage.getItem('access');
+    const puedeReservar = token && b.disponible;
+
+    let botonHtml = '';
+    if (!token) {
+      botonHtml = `<button class="btn btn-primary" onclick="window.location.href='login.html'">Iniciá sesión para reservar</button>`;
+    } else if (!b.disponible) {
+      botonHtml = `<button class="btn btn-primary" disabled style="opacity:.5;cursor:not-allowed;">No disponible</button>`;
+    } else {
+      botonHtml = `<button class="btn btn-primary" onclick="reservarLibro(${b.id})">Reservar</button>`;
+    }
+
     document.getElementById('modal-body').innerHTML = `
       <div class="modal-book-row">
         <div class="modal-cover" style="background:#2a1c2a">${b.portada || '📖'}</div>
@@ -154,9 +166,40 @@
           <p class="modal-meta">Año: <span>${b.anio || ''}</span></p>
         </div>
       </div>
-      <p class="modal-desc">${b.descripcion || ''}</p>`;
+      <p class="modal-desc">${b.descripcion || ''}</p>
+      <div class="modal-actions">${botonHtml}</div>`;
 
     document.getElementById('modal').classList.add('open');
+  }
+
+  async function reservarLibro(libroId) {
+    const token = localStorage.getItem('access');
+    const hoy = new Date();
+    const devolucion = new Date(hoy);
+    devolucion.setDate(hoy.getDate() + 14);
+    const fechaDevolucion = devolucion.toISOString().split('T')[0];
+
+    const res = await fetch('/api/reservas/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token
+      },
+      body: JSON.stringify({
+        libro: libroId,
+        fecha_devolucion: fechaDevolucion
+      })
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      alert('No se pudo reservar: ' + JSON.stringify(err));
+      return;
+    }
+
+    alert('¡Libro reservado correctamente!');
+    closeModal();
+    init();
   }
 
   function closeModal() { document.getElementById('modal').classList.remove('open'); }

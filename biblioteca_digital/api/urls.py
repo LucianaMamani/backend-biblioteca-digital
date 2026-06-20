@@ -11,6 +11,6 @@ router.register(r'usuarios', views.UsuarioViewSet)
 router.register(r'auth',     views.RegisterView,   basename='auth')
 
 urlpatterns = [
-    path('usuarios/me/', views.me, name='me'),
+    path('perfil/me/', views.me, name='me'),
     path('', include(router.urls)),
 ]
