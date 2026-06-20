@@ -66,51 +66,66 @@
 
   <script src="../js/data.js"></script>
   <script src="../js/utils.js"></script>
-  <script>
-    if (Auth.isLoggedIn()) window.location.href = 'panel-usuario.html';
+<script>
+  document.getElementById('reg-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const nombre   = document.getElementById('nombre').value.trim();
+    const apellido = document.getElementById('apellido').value.trim();
+    const email    = document.getElementById('email').value.trim();
+    const pass     = document.getElementById('password').value;
+    const pass2    = document.getElementById('password2').value;
 
-    document.getElementById('reg-form').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const nombre   = document.getElementById('nombre').value.trim();
-      const apellido = document.getElementById('apellido').value.trim();
-      const email    = document.getElementById('email').value.trim();
-      const pass     = document.getElementById('password').value;
-      const pass2    = document.getElementById('password2').value;
-      let valid = true;
-
-      ['err-nombre','err-email','err-pass','err-pass2','err-general'].forEach(id => {
-        const el = document.getElementById(id);
-        el.textContent = ''; el.classList.remove('visible');
-      });
-
-      if (!nombre) {
-        document.getElementById('err-nombre').textContent = 'El nombre es requerido.';
-        document.getElementById('err-nombre').classList.add('visible'); valid = false;
-      }
-      if (!/\S+@\S+\.\S+/.test(email)) {
-        document.getElementById('err-email').textContent = 'Correo inválido.';
-        document.getElementById('err-email').classList.add('visible'); valid = false;
-      }
-      if (DB.getUserByEmail(email)) {
-        document.getElementById('err-email').textContent = 'Este correo ya está registrado.';
-        document.getElementById('err-email').classList.add('visible'); valid = false;
-      }
-      if (pass.length < 6) {
-        document.getElementById('err-pass').textContent = 'Mínimo 6 caracteres.';
-        document.getElementById('err-pass').classList.add('visible'); valid = false;
-      }
-      if (pass !== pass2) {
-        document.getElementById('err-pass2').textContent = 'Las contraseñas no coinciden.';
-        document.getElementById('err-pass2').classList.add('visible'); valid = false;
-      }
-      if (!valid) return;
-
-      const newUser = { id: DB.users.length + 1, nombre: `${nombre} ${apellido}`, email, password: pass, role: 'user' };
-      DB.users.push(newUser);
-      Auth.login({ id: newUser.id, nombre: newUser.nombre, email: newUser.email, role: 'user' });
-      showToast('¡Cuenta creada exitosamente!');
-      setTimeout(() => window.location.href = 'panel-usuario.html', 1000);
+    ['err-nombre','err-email','err-pass','err-pass2','err-general'].forEach(id => {
+      const el = document.getElementById(id);
+      el.textContent = ''; el.classList.remove('visible');
     });
-  </script>
+
+    let valid = true;
+    if (!nombre) {
+      document.getElementById('err-nombre').textContent = 'El nombre es requerido.';
+      document.getElementById('err-nombre').classList.add('visible'); valid = false;
+    }
+    if (pass.length < 6) {
+      document.getElementById('err-pass').textContent = 'Mínimo 6 caracteres.';
+      document.getElementById('err-pass').classList.add('visible'); valid = false;
+    }
+    if (pass !== pass2) {
+      document.getElementById('err-pass2').textContent = 'Las contraseñas no coinciden.';
+      document.getElementById('err-pass2').classList.add('visible'); valid = false;
+    }
+    if (!valid) return;
+
+    const res = await fetch('/api/auth/register/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username:   email,
+        email:      email,
+        password:   pass,
+        first_name: nombre,
+        last_name:  apellido
+      })
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      document.getElementById('err-general').textContent = err.username?.[0] || 'Error al registrarse.';
+      document.getElementById('err-general').classList.add('visible');
+      return;
+    }
+
+    // Login automático después del registro
+    const loginRes = await fetch('/api/token/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: email, password: pass })
+    });
+
+    const data = await loginRes.json();
+    localStorage.setItem('access', data.access);
+    localStorage.setItem('refresh', data.refresh);
+    window.location.href = 'panel-usuario.html';
+  });
+</script>
 </body>
 </html>

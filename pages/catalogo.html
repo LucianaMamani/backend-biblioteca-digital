@@ -102,79 +102,90 @@
     </div>
   </div>
 
-  <script src="../js/data.js"></script>
+  
   <script src="../js/utils.js"></script>
-  <script>
-    renderNav('catalogo');
+<script>
+  renderNav('catalogo');
 
-    function renderBooks() {
-      const query = document.getElementById('search-input').value.toLowerCase();
-      const genre = document.getElementById('filter-genre').value;
-      const avail = document.getElementById('filter-avail').value;
+  let allBooks = [];
 
-      let books = DB.books.map(DB.getBookWithDetails);
-      if (query) books = books.filter(b => b.titulo.toLowerCase().includes(query) || b.autor && b.autor.nombre.toLowerCase().includes(query));
-      if (genre) books = books.filter(b => b.genero == genre);
-      if (avail !== '') books = books.filter(b => b.disponibilidad === (avail === 'true' ? 'disponible' : 'reservado'));
+  function renderBooks() {
+    const query = document.getElementById('search-input').value.toLowerCase();
+    const genre = document.getElementById('filter-genre').value;
+    const avail = document.getElementById('filter-avail').value;
 
-      const grid  = document.getElementById('books-grid');
-      const empty = document.getElementById('empty-state');
-      document.getElementById('results-count').textContent = `${books.length} resultado${books.length !== 1 ? 's' : ''}`;
+    let books = allBooks;
+    if (query) books = books.filter(b => b.titulo.toLowerCase().includes(query) || (b.autor_nombre && b.autor_nombre.toLowerCase().includes(query)));
+    if (genre) books = books.filter(b => b.genero == genre);
+    if (avail !== '') books = books.filter(b => b.disponible === (avail === 'true'));
 
-      if (!books.length) { grid.innerHTML = ''; empty.classList.add('visible'); return; }
-      empty.classList.remove('visible');
+    const grid  = document.getElementById('books-grid');
+    const empty = document.getElementById('empty-state');
+    document.getElementById('results-count').textContent = `${books.length} resultado${books.length !== 1 ? 's' : ''}`;
 
-      const colores = ['#2a1c2a','#1e3040','#1a2e1a','#3d2b1f','#2d1e30','#1c2a3a'];
-      const emojis  = ['📕','📘','📗','📙','📓','📒'];
+    if (!books.length) { grid.innerHTML = ''; empty.classList.add('visible'); return; }
+    empty.classList.remove('visible');
 
-      grid.innerHTML = books.map((b, i) => `
-        <div class="book-card" onclick="openModal(${b.id})">
-          <div class="book-cover" style="background:${colores[i % colores.length]}">${emojis[i % emojis.length]}</div>
-          <p class="book-genre">${b.genero ? b.genero.nombre : ''}</p>
-          <p class="book-title">${b.titulo}</p>
-          <p class="book-author">${b.autor ? b.autor.nombre + ' ' + b.autor.apellido : ''}</p>
-          <span class="badge badge-available">${b.disponibilidad}</span>
-        </div>`).join('');
-    }
+    const colores = ['#2a1c2a','#1e3040','#1a2e1a','#3d2b1f','#2d1e30','#1c2a3a'];
 
-    function openModal(bookId) {
-      const b = DB.getBookWithDetails(DB.getBook(bookId));
-      document.getElementById('modal-header-content').innerHTML = `
-        <p class="book-genre">${b.genero ? b.genero.nombre : ''}</p>
-        <p style="font-family:var(--font-head);font-size:1.1rem;">${b.titulo}</p>`;
+    grid.innerHTML = books.map((b, i) => `
+      <div class="book-card" onclick="openModal(${b.id})">
+        <div class="book-cover" style="background:${colores[i % colores.length]}">${b.portada || '📖'}</div>
+        <p class="book-genre">${b.genero_nombre || ''}</p>
+        <p class="book-title">${b.titulo}</p>
+        <p class="book-author">${b.autor_nombre || ''}</p>
+        <span class="badge ${b.disponible ? 'badge-available' : 'badge-reserved'}">${b.disponible ? 'disponible' : 'reservado'}</span>
+      </div>`).join('');
+  }
 
-      document.getElementById('modal-body').innerHTML = `
-        <div class="modal-book-row">
-          <div class="modal-cover" style="background:#2a1c2a">📖</div>
-          <div>
-            <p class="modal-title">${b.titulo}</p>
-            <p class="modal-meta">Autor: <span>${b.autor ? b.autor.nombre + ' ' + b.autor.apellido : ''}</span></p>
-            <p class="modal-meta">Género: <span>${b.genero ? b.genero.nombre : ''}</span></p>
-            <p class="modal-meta">Año: <span>${b.anio_publicacion}</span></p>
-          </div>
+  function openModal(bookId) {
+    const b = allBooks.find(x => x.id === bookId);
+    document.getElementById('modal-header-content').innerHTML = `
+      <p class="book-genre">${b.genero_nombre || ''}</p>
+      <p style="font-family:var(--font-head);font-size:1.1rem;">${b.titulo}</p>`;
+
+    document.getElementById('modal-body').innerHTML = `
+      <div class="modal-book-row">
+        <div class="modal-cover" style="background:#2a1c2a">${b.portada || '📖'}</div>
+        <div>
+          <p class="modal-title">${b.titulo}</p>
+          <p class="modal-meta">Autor: <span>${b.autor_nombre || ''}</span></p>
+          <p class="modal-meta">Género: <span>${b.genero_nombre || ''}</span></p>
+          <p class="modal-meta">Año: <span>${b.anio || ''}</span></p>
         </div>
-        <p class="modal-desc">${b.descripcion}</p>`;
+      </div>
+      <p class="modal-desc">${b.descripcion || ''}</p>`;
 
-      document.getElementById('modal').classList.add('open');
-    }
+    document.getElementById('modal').classList.add('open');
+  }
 
-    function closeModal() { document.getElementById('modal').classList.remove('open'); }
+  function closeModal() { document.getElementById('modal').classList.remove('open'); }
 
-    document.getElementById('search-input').addEventListener('input', debounce(renderBooks));
-    document.getElementById('filter-genre').addEventListener('change', renderBooks);
-    document.getElementById('filter-avail').addEventListener('change', renderBooks);
-    document.getElementById('modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
+  document.getElementById('search-input').addEventListener('input', debounce(renderBooks));
+  document.getElementById('filter-genre').addEventListener('change', renderBooks);
+  document.getElementById('filter-avail').addEventListener('change', renderBooks);
+  document.getElementById('modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
 
-    // Cargar datos desde la API y luego renderizar
-    DB.cargarDatos().then(() => {
-      const genreSelect = document.getElementById('filter-genre');
-      DB.genres.forEach(g => {
-        const opt = document.createElement('option');
-        opt.value = g.id; opt.textContent = g.nombre;
-        genreSelect.appendChild(opt);
-      });
-      renderBooks();
+  // Cargar libros y géneros reales desde la API
+  async function init() {
+    const [librosRes, generosRes] = await Promise.all([
+      fetch('/api/libros/'),
+      fetch('/api/generos/')
+    ]);
+    allBooks = await librosRes.json();
+    const generos = await generosRes.json();
+
+    const genreSelect = document.getElementById('filter-genre');
+    generos.forEach(g => {
+      const opt = document.createElement('option');
+      opt.value = g.id; opt.textContent = g.nombre;
+      genreSelect.appendChild(opt);
     });
-  </script>
+
+    renderBooks();
+  }
+
+  init();
+</script>
 </body>
 </html>
