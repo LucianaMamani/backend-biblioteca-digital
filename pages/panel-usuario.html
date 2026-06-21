@@ -91,18 +91,9 @@
   if (!token) window.location.href = 'login.html';
 
   async function init() {
-    console.log('Token:', token ? token.substring(0, 20) + '...' : 'NULL');
-    const res = await fetch('/api/perfil/me/', {
-      headers: { 'Authorization': 'Bearer ' + token }
-    });
+    const res = await fetchConToken('/api/perfil/me/');
 
-    console.log('Status:', res.status);
-    if (!res.ok) { 
-      const err = await res.json();
-      console.log('Error:', err);
-      //window.location.href = 'login.html'; 
-      return; 
-    }
+    if (!res.ok) { return; }
 
     const user = await res.json();
 
@@ -144,11 +135,7 @@
 
   async function cancelarReserva(reservaId) {
     if (!confirm('¿Confirmás que querés cancelar esta reserva?')) return;
-    const token = localStorage.getItem('access');
-    const res = await fetch(`/api/reservas/${reservaId}/`, {
-      method: 'DELETE',
-      headers: { 'Authorization': 'Bearer ' + token }
-    });
+    const res = await fetchConToken(`/api/reservas/${reservaId}/`, { method: 'DELETE' });
     if (!res.ok) {
       showToast('No se pudo cancelar la reserva', 'error');
       return;

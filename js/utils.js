@@ -65,3 +65,36 @@ function debounce(fn, delay = 300) {
   let t;
   return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), delay); };
 }
+
+async function fetchConToken(url, options = {}) {
+  let token = localStorage.getItem('access');
+  options.headers = options.headers || {};
+  options.headers['Authorization'] = 'Bearer ' + token;
+
+  let res = await fetch(url, options);
+
+  if (res.status === 401) {
+    const refresh = localStorage.getItem('refresh');
+    if (!refresh) { localStorage.clear(); window.location.href = '/pages/login.html'; return res; }
+
+    const refreshRes = await fetch('/api/token/refresh/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refresh })
+    });
+
+    if (!refreshRes.ok) {
+      localStorage.clear();
+      window.location.href = '/pages/login.html';
+      return res;
+    }
+
+    const data = await refreshRes.json();
+    localStorage.setItem('access', data.access);
+
+    options.headers['Authorization'] = 'Bearer ' + data.access;
+    res = await fetch(url, options);
+  }
+
+  return res;
+}

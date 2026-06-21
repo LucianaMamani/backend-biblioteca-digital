@@ -235,11 +235,10 @@
 
     // ── DASHBOARD ──
     async function renderDashboard() {
-      const token = localStorage.getItem('access');
       const [librosRes, reservasRes, usuariosRes] = await Promise.all([
-        fetch('/api/libros/', { headers: { 'Authorization': 'Bearer ' + token } }),
-        fetch('/api/reservas/', { headers: { 'Authorization': 'Bearer ' + token } }),
-        fetch('/api/usuarios/', { headers: { 'Authorization': 'Bearer ' + token } })
+        fetchConToken('/api/libros/'),
+        fetchConToken('/api/reservas/'),
+        fetchConToken('/api/usuarios/')
       ]);
       const libros = await librosRes.json();
       const reservas = await reservasRes.json();
@@ -270,10 +269,7 @@
     let cacheLibros = [];
 
     async function renderLibros() {
-      const token = localStorage.getItem('access');
-      const res = await fetch('/api/libros/', {
-        headers: { 'Authorization': 'Bearer ' + token }
-      });
+      const res = await fetchConToken('/api/libros/');
       cacheLibros = await res.json();
 
       const rows = cacheLibros.map(b => `
@@ -298,10 +294,7 @@
     let cacheAutores = [];
 
     async function renderAutores() {
-      const token = localStorage.getItem('access');
-      const res = await fetch('/api/autores/', {
-        headers: { 'Authorization': 'Bearer ' + token }
-      });
+      const res = await fetchConToken('/api/autores/');
       cacheAutores = await res.json();
 
       const rows = cacheAutores.map(a => `
@@ -323,10 +316,7 @@
     let cacheGeneros = [];
 
     async function renderGeneros() {
-      const token = localStorage.getItem('access');
-      const res = await fetch('/api/generos/', {
-        headers: { 'Authorization': 'Bearer ' + token }
-      });
+      const res = await fetchConToken('/api/generos/');
       cacheGeneros = await res.json();
 
       const rows = cacheGeneros.map(g => `
@@ -345,10 +335,7 @@
 
     // ── RESERVAS ──
     async function renderReservas() {
-      const token = localStorage.getItem('access');
-      const res = await fetch('/api/reservas/', {
-        headers: { 'Authorization': 'Bearer ' + token }
-      });
+      const res = await fetchConToken('/api/reservas/');
       const reservas = await res.json();
 
       const rows = reservas.map(r => `
@@ -368,10 +355,7 @@
 
     // ── USUARIOS ──
     async function renderUsuarios() {
-      const token = localStorage.getItem('access');
-      const res = await fetch('/api/usuarios/', {
-        headers: { 'Authorization': 'Bearer ' + token }
-      });
+      const res = await fetchConToken('/api/usuarios/');
       const usuarios = await res.json();
 
       const rows = usuarios.map(u => `
@@ -397,10 +381,9 @@
 
       if (type === 'libro') {
         const b = id ? cacheLibros.find(x => x.id === id) : {};
-        const token = localStorage.getItem('access');
         const [autoresRes, generosRes] = await Promise.all([
-          fetch('/api/autores/', { headers: { 'Authorization': 'Bearer ' + token } }),
-          fetch('/api/generos/', { headers: { 'Authorization': 'Bearer ' + token } })
+          fetchConToken('/api/autores/'),
+          fetchConToken('/api/generos/')
         ]);
         const autores = await autoresRes.json();
         const generos = await generosRes.json();
@@ -479,7 +462,6 @@
         const titulo = document.getElementById('f-titulo').value.trim();
         if (!titulo) { showToast('El título es requerido', 'error'); return; }
 
-        const token = localStorage.getItem('access');
         const payload = {
           titulo,
           autor:       +document.getElementById('f-autor').value,
@@ -494,12 +476,9 @@
         const url = id ? `/api/libros/${id}/` : '/api/libros/';
         const method = id ? 'PUT' : 'POST';
 
-        const res = await fetch(url, {
+        const res = await fetchConToken(url, {
           method,
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + token
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
 
@@ -515,7 +494,6 @@
         const nombre = document.getElementById('f-nombre').value.trim();
         if (!nombre) { showToast('El nombre es requerido', 'error'); return; }
 
-        const token = localStorage.getItem('access');
         const payload = {
           nombre,
           nacionalidad: document.getElementById('f-nac').value,
@@ -525,12 +503,9 @@
         const url = id ? `/api/autores/${id}/` : '/api/autores/';
         const method = id ? 'PUT' : 'POST';
 
-        const res = await fetch(url, {
+        const res = await fetchConToken(url, {
           method,
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + token
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
 
@@ -546,16 +521,12 @@
         const nombre = document.getElementById('f-gnombre').value.trim();
         if (!nombre) { showToast('El nombre es requerido', 'error'); return; }
 
-        const token = localStorage.getItem('access');
         const url = id ? `/api/generos/${id}/` : '/api/generos/';
         const method = id ? 'PUT' : 'POST';
 
-        const res = await fetch(url, {
+        const res = await fetchConToken(url, {
           method,
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + token
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ nombre })
         });
 
@@ -575,51 +546,31 @@
     async function deleteItem(type, id) {
       if (!confirm('¿Confirmás la eliminación?')) return;
       if (type === 'libro') {
-        const token = localStorage.getItem('access');
-        await fetch(`/api/libros/${id}/`, {
-          method: 'DELETE',
-          headers: { 'Authorization': 'Bearer ' + token }
-        });
+        await fetchConToken(`/api/libros/${id}/`, { method: 'DELETE' });
         await renderLibros();
         showToast('Eliminado correctamente');
         return;
       }
       if (type === 'autor') {
-        const token = localStorage.getItem('access');
-        await fetch(`/api/autores/${id}/`, {
-          method: 'DELETE',
-          headers: { 'Authorization': 'Bearer ' + token }
-        });
+        await fetchConToken(`/api/autores/${id}/`, { method: 'DELETE' });
         await renderAutores();
         showToast('Eliminado correctamente');
         return;
       }
       if (type === 'genero') {
-        const token = localStorage.getItem('access');
-        await fetch(`/api/generos/${id}/`, {
-          method: 'DELETE',
-          headers: { 'Authorization': 'Bearer ' + token }
-        });
+        await fetchConToken(`/api/generos/${id}/`, { method: 'DELETE' });
         await renderGeneros();
         showToast('Eliminado correctamente');
         return;
       }
       if (type === 'reserva') {
-        const token = localStorage.getItem('access');
-        await fetch(`/api/reservas/${id}/`, {
-          method: 'DELETE',
-          headers: { 'Authorization': 'Bearer ' + token }
-        });
+        await fetchConToken(`/api/reservas/${id}/`, { method: 'DELETE' });
         await renderReservas();
         showToast('Reserva cancelada');
         return;
       }
       if (type === 'usuario') {
-        const token = localStorage.getItem('access');
-        await fetch(`/api/usuarios/${id}/`, {
-          method: 'DELETE',
-          headers: { 'Authorization': 'Bearer ' + token }
-        });
+        await fetchConToken(`/api/usuarios/${id}/`, { method: 'DELETE' });
         await renderUsuarios();
         showToast('Usuario eliminado');
         return;

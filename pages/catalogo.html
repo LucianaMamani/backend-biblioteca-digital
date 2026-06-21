@@ -173,18 +173,14 @@
   }
 
   async function reservarLibro(libroId) {
-    const token = localStorage.getItem('access');
     const hoy = new Date();
     const devolucion = new Date(hoy);
     devolucion.setDate(hoy.getDate() + 14);
     const fechaDevolucion = devolucion.toISOString().split('T')[0];
 
-    const res = await fetch('/api/reservas/', {
+    const res = await fetchConToken('/api/reservas/', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + token
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         libro: libroId,
         fecha_devolucion: fechaDevolucion
