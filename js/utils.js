@@ -1,15 +1,11 @@
 // ── SHARED UTILITIES ──
 
 const Auth = {
-  isLoggedIn: () => !!localStorage.getItem('bd_user'),
-  getUser:    () => JSON.parse(localStorage.getItem('bd_user') || 'null'),
-  isAdmin:    () => { const u = Auth.getUser(); return u && u.role === 'admin'; },
-  login:      (user) => localStorage.setItem('bd_user', JSON.stringify(user)),
-  logout:     () => { localStorage.removeItem('bd_user'); window.location.href = '../index.html'; }
+  isLoggedIn: () => !!localStorage.getItem('access'),
+  logout:     () => { localStorage.clear(); window.location.href = '/'; }
 };
 
-function renderNav(activeLink = '') {
-  const user  = Auth.getUser();
+async function renderNav(activeLink = '') {
   const navEl = document.getElementById('main-nav');
   if (!navEl) return;
 
@@ -22,16 +18,24 @@ function renderNav(activeLink = '') {
     `<li><a href="${l.href}" class="${activeLink === l.key ? 'active' : ''}">${l.label}</a></li>`
   ).join('');
 
-  let actionsHTML = '';
-  if (user) {
-    const panelLink = user.role === 'admin' ? '../pages/panel-admin.html' : '../pages/panel-usuario.html';
+  const token = localStorage.getItem('access');
+  let actionsHTML = `
+    <a href="../pages/login.html"    class="btn btn-ghost btn-sm">Iniciar sesión</a>
+    <a href="../pages/register.html" class="btn btn-primary btn-sm">Registrarse</a>`;
+
+  if (token) {
+    let panelLink = '../pages/panel-usuario.html';
+    try {
+      const res = await fetch('/api/perfil/me/', { headers: { 'Authorization': 'Bearer ' + token } });
+      if (res.ok) {
+        const user = await res.json();
+        panelLink = user.is_staff ? '../pages/panel-admin.html' : '../pages/panel-usuario.html';
+      }
+    } catch (e) {}
+
     actionsHTML = `
       <a href="${panelLink}" class="btn btn-ghost btn-sm">Mi panel</a>
       <button onclick="Auth.logout()" class="btn btn-ghost btn-sm">Salir</button>`;
-  } else {
-    actionsHTML = `
-      <a href="../pages/login.html"    class="btn btn-ghost btn-sm">Iniciar sesión</a>
-      <a href="../pages/register.html" class="btn btn-primary btn-sm">Registrarse</a>`;
   }
 
   navEl.innerHTML = `

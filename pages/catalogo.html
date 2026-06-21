@@ -193,11 +193,11 @@
 
     if (!res.ok) {
       const err = await res.json();
-      alert('No se pudo reservar: ' + JSON.stringify(err));
+      showToast('No se pudo reservar el libro', 'error');
       return;
     }
 
-    alert('¡Libro reservado correctamente!');
+    showToast('¡Libro reservado correctamente!');
     closeModal();
     init();
   }

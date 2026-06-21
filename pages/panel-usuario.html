@@ -137,8 +137,24 @@
         </div>
         <div class="res-state">
           <span class="badge ${r.estado === 'activa' ? 'badge-available' : 'badge-reserved'}">${r.estado}</span>
+          ${r.estado === 'activa' ? `<button class="btn btn-danger btn-sm" style="margin-top:.5rem;" onclick="cancelarReserva(${r.id})">Cancelar</button>` : ''}
         </div>
       </div>`).join('');
+  }
+
+  async function cancelarReserva(reservaId) {
+    if (!confirm('¿Confirmás que querés cancelar esta reserva?')) return;
+    const token = localStorage.getItem('access');
+    const res = await fetch(`/api/reservas/${reservaId}/`, {
+      method: 'DELETE',
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    if (!res.ok) {
+      showToast('No se pudo cancelar la reserva', 'error');
+      return;
+    }
+    showToast('Reserva cancelada correctamente');
+    init();
   }
 
   function switchTab(id, btn) {
