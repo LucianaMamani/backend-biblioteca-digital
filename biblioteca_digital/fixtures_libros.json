@@ -4,8 +4,8 @@
   "pk": 1,
   "fields": {
     "nombre": "Gabriel Garcia Marquez",
-    "nacionalidad": "Colombiano",
-    "bio": "x"
+    "nacionalidad": "Colombia",
+    "bio": ""
   }
 },
 {
@@ -14,7 +14,88 @@
   "fields": {
     "nombre": "Ernesto Sábato",
     "nacionalidad": "Argentina",
-    "bio": "x"
+    "bio": ""
+  }
+},
+{
+  "model": "api.autor",
+  "pk": 4,
+  "fields": {
+    "nombre": "Julio Cortázar",
+    "nacionalidad": "Argentina",
+    "bio": ""
+  }
+},
+{
+  "model": "api.autor",
+  "pk": 5,
+  "fields": {
+    "nombre": "Jorge Luis Borges",
+    "nacionalidad": "Argentina",
+    "bio": ""
+  }
+},
+{
+  "model": "api.autor",
+  "pk": 6,
+  "fields": {
+    "nombre": "Franz Kafka",
+    "nacionalidad": "Alemania",
+    "bio": ""
+  }
+},
+{
+  "model": "api.autor",
+  "pk": 7,
+  "fields": {
+    "nombre": "Pablo Neruda",
+    "nacionalidad": "Chile",
+    "bio": ""
+  }
+},
+{
+  "model": "api.autor",
+  "pk": 8,
+  "fields": {
+    "nombre": "Juan Rulfo",
+    "nacionalidad": "México",
+    "bio": ""
+  }
+},
+{
+  "model": "api.autor",
+  "pk": 9,
+  "fields": {
+    "nombre": "Isabel Allende",
+    "nacionalidad": "Chile",
+    "bio": ""
+  }
+},
+{
+  "model": "api.autor",
+  "pk": 10,
+  "fields": {
+    "nombre": "Mario Vargas Llosa",
+    "nacionalidad": "Perú",
+    "bio": ""
+  }
+},
+{
+  "model": "api.autor",
+  "pk": 11,
+  "fields": {
+    "nombre": "Virginia Woolf",
+    "nacionalidad": "Reino unido",
+    "bio": ""
+  }
+},
+{
+  "model": "api.autor",
+  "pk": 12,
+  "fields": {
+    "nombre": "Mary Shelley",
+    "nacionalidad": "Reino unido",
+    "bio": ""
   }
 },
 {
@@ -32,17 +113,38 @@
   }
 },
 {
-  "model": "api.libro",
-  "pk": 1,
+  "model": "api.genero",
+  "pk": 4,
   "fields": {
-    "titulo": "El amor en los tiempos del cólera",
-    "autor": 1,
-    "genero": 1,
-    "anio": 1985,
-    "isbn": "978-0307389732",
-    "descripcion": "Una historia de amor que perdura más de cincuenta años entre Florentino Ariza y Fermina Daza.",
-    "disponible": false,
-    "portada": "📖"
+    "nombre": "Ficción"
+  }
+},
+{
+  "model": "api.genero",
+  "pk": 5,
+  "fields": {
+    "nombre": "Poesía"
+  }
+},
+{
+  "model": "api.genero",
+  "pk": 6,
+  "fields": {
+    "nombre": "Clásicos"
+  }
+},
+{
+  "model": "api.genero",
+  "pk": 7,
+  "fields": {
+    "nombre": "Realismo Mágico"
+  }
+},
+{
+  "model": "api.genero",
+  "pk": 8,
+  "fields": {
+    "nombre": "Terror"
   }
 },
 {
@@ -55,6 +157,132 @@
     "anio": 1948,
     "isbn": "978-9500728182",
     "descripcion": "La confesión de un pintor que narra el origen de su obsesión asesina hacia una mujer.",
+    "disponible": false,
+    "portada": "📖"
+  }
+},
+{
+  "model": "api.libro",
+  "pk": 4,
+  "fields": {
+    "titulo": "Rayuela",
+    "autor": 4,
+    "genero": 6,
+    "anio": 1963,
+    "isbn": "978-8437604572",
+    "descripcion": "Una novela experimental que puede leerse en distinto orden, narrando la búsqueda existencial de Horacio Oliveira entre París y Buenos Aires.",
+    "disponible": true,
+    "portada": "📖"
+  }
+},
+{
+  "model": "api.libro",
+  "pk": 5,
+  "fields": {
+    "titulo": "Ficciones",
+    "autor": 5,
+    "genero": 4,
+    "anio": 1944,
+    "isbn": "978-8420633097",
+    "descripcion": "Una colección de cuentos que exploran laberintos, bibliotecas infinitas y realidades alternativas.",
+    "disponible": true,
+    "portada": "📖"
+  }
+},
+{
+  "model": "api.libro",
+  "pk": 6,
+  "fields": {
+    "titulo": "El proceso",
+    "autor": 6,
+    "genero": 6,
+    "anio": 1925,
+    "isbn": "978-8420674209",
+    "descripcion": "Josef K. es arrestado y procesado por un crimen que nunca se le revela, en una crítica a la burocracia y al absurdo del sistema judicial.",
+    "disponible": true,
+    "portada": "📖"
+  }
+},
+{
+  "model": "api.libro",
+  "pk": 7,
+  "fields": {
+    "titulo": "Veinte poemas de amor y una canción desesperada",
+    "autor": 7,
+    "genero": 5,
+    "anio": 1924,
+    "isbn": "978-8420671413",
+    "descripcion": "Uno de los libros de poesía más leídos en español, que explora el amor juvenil y la melancolía.",
+    "disponible": true,
+    "portada": "📖"
+  }
+},
+{
+  "model": "api.libro",
+  "pk": 8,
+  "fields": {
+    "titulo": "Pedro Páramo",
+    "autor": 8,
+    "genero": 4,
+    "anio": 1955,
+    "isbn": "978-8437604596",
+    "descripcion": "Juan Preciado viaja al pueblo de Comala en busca de su padre, Pedro Páramo, y se adentra en un mundo habitado por fantasmas y voces del pasado.",
+    "disponible": true,
+    "portada": "📖"
+  }
+},
+{
+  "model": "api.libro",
+  "pk": 9,
+  "fields": {
+    "titulo": "La casa de los espíritus",
+    "autor": 9,
+    "genero": 7,
+    "anio": 1982,
+    "isbn": "978-8401242080",
+    "descripcion": "La saga de la familia Trueba a lo largo de varias generaciones, marcada por el amor, la política y elementos sobrenaturales.",
+    "disponible": true,
+    "portada": "📖"
+  }
+},
+{
+  "model": "api.libro",
+  "pk": 10,
+  "fields": {
+    "titulo": "La ciudad y los perros",
+    "autor": 10,
+    "genero": 2,
+    "anio": 1963,
+    "isbn": "978-8420471862",
+    "descripcion": "La vida de un grupo de cadetes en un colegio militar de Lima, retratando la violencia y la crisis de identidad adolescente.",
+    "disponible": true,
+    "portada": "📖"
+  }
+},
+{
+  "model": "api.libro",
+  "pk": 11,
+  "fields": {
+    "titulo": "Mrs. Dalloway",
+    "autor": 11,
+    "genero": 6,
+    "anio": 1925,
+    "isbn": "978-8497592602",
+    "descripcion": "Un día en la vida de Clarissa Dalloway en Londres, narrado mediante el flujo de conciencia y reflexiones sobre el tiempo y la memoria.",
+    "disponible": true,
+    "portada": "📖"
+  }
+},
+{
+  "model": "api.libro",
+  "pk": 12,
+  "fields": {
+    "titulo": "Frankenstein",
+    "autor": 12,
+    "genero": 8,
+    "anio": 1818,
+    "isbn": "978-8420674674",
+    "descripcion": "El científico Victor Frankenstein crea una criatura a partir de partes de cadáveres, desatando una tragedia sobre la ambición y la responsabilidad humana.",
     "disponible": true,
     "portada": "📖"
   }
