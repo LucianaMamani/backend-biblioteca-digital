@@ -39,7 +39,7 @@ async function renderNav(activeLink = '') {
   }
 
   navEl.innerHTML = `
-    <a href="../index.html" class="nav-logo">Biblio<span>Digital</span></a>
+    <a href="/" class="nav-logo">Biblio<span>Digital</span></a>
     <ul class="nav-links">${linksHTML}</ul>
     <div class="nav-actions">${actionsHTML}</div>`;
 }
