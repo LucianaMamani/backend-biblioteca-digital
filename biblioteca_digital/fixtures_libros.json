@@ -99,6 +99,96 @@
   }
 },
 {
+  "model": "api.autor",
+  "pk": 13,
+  "fields": {
+    "nombre": "Stephen King",
+    "nacionalidad": "Estados Unidos",
+    "bio": ""
+  }
+},
+{
+  "model": "api.autor",
+  "pk": 14,
+  "fields": {
+    "nombre": "Agatha Christie",
+    "nacionalidad": "Reino Unido",
+    "bio": ""
+  }
+},
+{
+  "model": "api.autor",
+  "pk": 15,
+  "fields": {
+    "nombre": "J. K. Rowling",
+    "nacionalidad": "Reino Unido",
+    "bio": ""
+  }
+},
+{
+  "model": "api.autor",
+  "pk": 16,
+  "fields": {
+    "nombre": "George Orwell",
+    "nacionalidad": "Reino Unido",
+    "bio": ""
+  }
+},
+{
+  "model": "api.autor",
+  "pk": 17,
+  "fields": {
+    "nombre": "Antoine de Saint-Exupéry",
+    "nacionalidad": "Francia",
+    "bio": ""
+  }
+},
+{
+  "model": "api.autor",
+  "pk": 18,
+  "fields": {
+    "nombre": "Miguel de Cervantes",
+    "nacionalidad": "España",
+    "bio": ""
+  }
+},
+{
+  "model": "api.autor",
+  "pk": 19,
+  "fields": {
+    "nombre": "William Shakespeare",
+    "nacionalidad": "Reino Unido",
+    "bio": ""
+  }
+},
+{
+  "model": "api.autor",
+  "pk": 20,
+  "fields": {
+    "nombre": "Jane Austen",
+    "nacionalidad": "Reino Unido",
+    "bio": ""
+  }
+},
+{
+  "model": "api.autor",
+  "pk": 21,
+  "fields": {
+    "nombre": "Fiódor Dostoyevski",
+    "nacionalidad": "Rusia",
+    "bio": ""
+  }
+},
+{
+  "model": "api.autor",
+  "pk": 22,
+  "fields": {
+    "nombre": "J. R. R. Tolkien",
+    "nacionalidad": "Reino Unido",
+    "bio": ""
+  }
+},
+{
   "model": "api.genero",
   "pk": 1,
   "fields": {
@@ -145,6 +235,48 @@
   "pk": 8,
   "fields": {
     "nombre": "Terror"
+  }
+},
+{
+  "model": "api.genero",
+  "pk": 9,
+  "fields": {
+    "nombre": "Fantasía"
+  }
+},
+{
+  "model": "api.genero",
+  "pk": 10,
+  "fields": {
+    "nombre": "Ciencia Ficción"
+  }
+},
+{
+  "model": "api.genero",
+  "pk": 11,
+  "fields": {
+    "nombre": "Misterio"
+  }
+},
+{
+  "model": "api.genero",
+  "pk": 12,
+  "fields": {
+    "nombre": "Drama"
+  }
+},
+{
+  "model": "api.genero",
+  "pk": 13,
+  "fields": {
+    "nombre": "Aventura"
+  }
+},
+{
+  "model": "api.genero",
+  "pk": 14,
+  "fields": {
+    "nombre": "Distopía"
   }
 },
 {
@@ -283,6 +415,427 @@
     "anio": 1818,
     "isbn": "978-8420674674",
     "descripcion": "El científico Victor Frankenstein crea una criatura a partir de partes de cadáveres, desatando una tragedia sobre la ambición y la responsabilidad humana.",
+    "disponible": true,
+    "portada": "📖"
+  }
+}
+,
+{
+  "model": "api.libro",
+  "pk": 13,
+  "fields": {
+    "titulo": "Cien años de soledad",
+    "autor": 1,
+    "genero": 7,
+    "anio": 1967,
+    "isbn": "978-0307474728",
+    "descripcion": "La historia de la familia Buendía en el pueblo ficticio de Macondo, marcada por el realismo mágico, la soledad y el paso del tiempo.",
+    "disponible": true,
+    "portada": "📖"
+  }
+},
+{
+  "model": "api.libro",
+  "pk": 14,
+  "fields": {
+    "titulo": "Crónica de una muerte anunciada",
+    "autor": 1,
+    "genero": 2,
+    "anio": 1981,
+    "isbn": "978-0307387738",
+    "descripcion": "La reconstrucción de un asesinato anunciado en un pequeño pueblo, donde todos parecen saber lo que ocurrirá menos la víctima.",
+    "disponible": true,
+    "portada": "📖"
+  }
+},
+{
+  "model": "api.libro",
+  "pk": 15,
+  "fields": {
+    "titulo": "Sobre héroes y tumbas",
+    "autor": 2,
+    "genero": 2,
+    "anio": 1961,
+    "isbn": "978-9500715793",
+    "descripcion": "Una novela profunda sobre la historia argentina, los conflictos familiares, la soledad y la búsqueda de sentido.",
+    "disponible": true,
+    "portada": "📖"
+  }
+},
+{
+  "model": "api.libro",
+  "pk": 16,
+  "fields": {
+    "titulo": "Bestiario",
+    "autor": 4,
+    "genero": 4,
+    "anio": 1951,
+    "isbn": "978-8420471831",
+    "descripcion": "Una colección de cuentos donde lo cotidiano se mezcla con lo fantástico y lo inquietante.",
+    "disponible": true,
+    "portada": "📖"
+  }
+},
+{
+  "model": "api.libro",
+  "pk": 17,
+  "fields": {
+    "titulo": "El Aleph",
+    "autor": 5,
+    "genero": 4,
+    "anio": 1949,
+    "isbn": "978-8420633110",
+    "descripcion": "Un conjunto de cuentos que exploran el infinito, la memoria, los laberintos y la relación entre realidad y ficción.",
+    "disponible": true,
+    "portada": "📖"
+  }
+},
+{
+  "model": "api.libro",
+  "pk": 18,
+  "fields": {
+    "titulo": "La metamorfosis",
+    "autor": 6,
+    "genero": 6,
+    "anio": 1915,
+    "isbn": "978-8420674155",
+    "descripcion": "Gregor Samsa despierta convertido en un insecto, iniciando una historia sobre la alienación, la familia y el absurdo.",
+    "disponible": true,
+    "portada": "📖"
+  }
+},
+{
+  "model": "api.libro",
+  "pk": 19,
+  "fields": {
+    "titulo": "El llano en llamas",
+    "autor": 8,
+    "genero": 4,
+    "anio": 1953,
+    "isbn": "978-8437605128",
+    "descripcion": "Una colección de cuentos sobre la vida rural mexicana, la violencia, la pobreza y las voces del pueblo.",
+    "disponible": true,
+    "portada": "📖"
+  }
+},
+{
+  "model": "api.libro",
+  "pk": 20,
+  "fields": {
+    "titulo": "Eva Luna",
+    "autor": 9,
+    "genero": 7,
+    "anio": 1987,
+    "isbn": "978-8401242059",
+    "descripcion": "La historia de una narradora que construye su vida a través de relatos, amor, memoria y fantasía.",
+    "disponible": true,
+    "portada": "📖"
+  }
+},
+{
+  "model": "api.libro",
+  "pk": 21,
+  "fields": {
+    "titulo": "La tía Julia y el escribidor",
+    "autor": 10,
+    "genero": 2,
+    "anio": 1977,
+    "isbn": "978-8420471855",
+    "descripcion": "Una novela que mezcla humor, romance y ficción autobiográfica en torno a un joven escritor y una relación inesperada.",
+    "disponible": true,
+    "portada": "📖"
+  }
+},
+{
+  "model": "api.libro",
+  "pk": 22,
+  "fields": {
+    "titulo": "Al faro",
+    "autor": 11,
+    "genero": 6,
+    "anio": 1927,
+    "isbn": "978-8491050290",
+    "descripcion": "Una novela introspectiva sobre una familia, el paso del tiempo y la percepción subjetiva de la realidad.",
+    "disponible": true,
+    "portada": "📖"
+  }
+},
+{
+  "model": "api.libro",
+  "pk": 23,
+  "fields": {
+    "titulo": "It",
+    "autor": 13,
+    "genero": 8,
+    "anio": 1986,
+    "isbn": "9781501142970",
+    "descripcion": "Un grupo de amigos enfrenta una entidad maligna que adopta la forma de sus peores miedos.",
+    "disponible": true,
+    "portada": "📖"
+  }
+},
+{
+  "model": "api.libro",
+  "pk": 24,
+  "fields": {
+    "titulo": "El resplandor",
+    "autor": 13,
+    "genero": 8,
+    "anio": 1977,
+    "isbn": "9780307743657",
+    "descripcion": "Una familia queda aislada en un hotel embrujado durante el invierno.",
+    "disponible": true,
+    "portada": "📖"
+  }
+},
+{
+  "model": "api.libro",
+  "pk": 25,
+  "fields": {
+    "titulo": "Asesinato en el Orient Express",
+    "autor": 14,
+    "genero": 11,
+    "anio": 1934,
+    "isbn": "9780007119318",
+    "descripcion": "Hércules Poirot investiga un misterioso asesinato ocurrido en un tren.",
+    "disponible": true,
+    "portada": "📖"
+  }
+},
+{
+  "model": "api.libro",
+  "pk": 26,
+  "fields": {
+    "titulo": "Diez negritos",
+    "autor": 14,
+    "genero": 11,
+    "anio": 1939,
+    "isbn": "9780062073488",
+    "descripcion": "Diez personas son invitadas a una isla donde comienzan a morir una por una.",
+    "disponible": true,
+    "portada": "📖"
+  }
+},
+{
+  "model": "api.libro",
+  "pk": 27,
+  "fields": {
+    "titulo": "Harry Potter y la piedra filosofal",
+    "autor": 15,
+    "genero": 9,
+    "anio": 1997,
+    "isbn": "9788478884452",
+    "descripcion": "Harry descubre que es un mago y comienza sus estudios en Hogwarts.",
+    "disponible": true,
+    "portada": "📖"
+  }
+},
+{
+  "model": "api.libro",
+  "pk": 28,
+  "fields": {
+    "titulo": "Harry Potter y la cámara secreta",
+    "autor": 15,
+    "genero": 9,
+    "anio": 1998,
+    "isbn": "9788478884957",
+    "descripcion": "Harry regresa a Hogwarts para enfrentar un antiguo misterio.",
+    "disponible": true,
+    "portada": "📖"
+  }
+},
+{
+  "model": "api.libro",
+  "pk": 29,
+  "fields": {
+    "titulo": "1984",
+    "autor": 16,
+    "genero": 14,
+    "anio": 1949,
+    "isbn": "9780451524935",
+    "descripcion": "Una sociedad controlada por un régimen totalitario y la vigilancia constante.",
+    "disponible": true,
+    "portada": "📖"
+  }
+},
+{
+  "model": "api.libro",
+  "pk": 30,
+  "fields": {
+    "titulo": "Rebelión en la granja",
+    "autor": 16,
+    "genero": 14,
+    "anio": 1945,
+    "isbn": "9780451526342",
+    "descripcion": "Una sátira política protagonizada por animales de una granja.",
+    "disponible": true,
+    "portada": "📖"
+  }
+},
+{
+  "model": "api.libro",
+  "pk": 31,
+  "fields": {
+    "titulo": "El principito",
+    "autor": 17,
+    "genero": 6,
+    "anio": 1943,
+    "isbn": "9780156012195",
+    "descripcion": "Una fábula poética sobre la amistad, el amor y la vida.",
+    "disponible": true,
+    "portada": "📖"
+  }
+},
+{
+  "model": "api.libro",
+  "pk": 32,
+  "fields": {
+    "titulo": "Don Quijote de la Mancha",
+    "autor": 18,
+    "genero": 6,
+    "anio": 1605,
+    "isbn": "9788420412142",
+    "descripcion": "Las aventuras de un hidalgo que confunde la realidad con sus lecturas de caballería.",
+    "disponible": true,
+    "portada": "📖"
+  }
+},
+{
+  "model": "api.libro",
+  "pk": 33,
+  "fields": {
+    "titulo": "Hamlet",
+    "autor": 19,
+    "genero": 12,
+    "anio": 1603,
+    "isbn": "9788420674735",
+    "descripcion": "La tragedia del príncipe de Dinamarca en busca de venganza.",
+    "disponible": true,
+    "portada": "📖"
+  }
+},
+{
+  "model": "api.libro",
+  "pk": 34,
+  "fields": {
+    "titulo": "Macbeth",
+    "autor": 19,
+    "genero": 12,
+    "anio": 1606,
+    "isbn": "9788420674742",
+    "descripcion": "Una tragedia sobre la ambición desmedida y sus consecuencias.",
+    "disponible": true,
+    "portada": "📖"
+  }
+},
+{
+  "model": "api.libro",
+  "pk": 35,
+  "fields": {
+    "titulo": "Orgullo y prejuicio",
+    "autor": 20,
+    "genero": 1,
+    "anio": 1813,
+    "isbn": "9780141439518",
+    "descripcion": "Una de las novelas románticas más influyentes de la literatura.",
+    "disponible": true,
+    "portada": "📖"
+  }
+},
+{
+  "model": "api.libro",
+  "pk": 36,
+  "fields": {
+    "titulo": "Emma",
+    "autor": 20,
+    "genero": 1,
+    "anio": 1815,
+    "isbn": "9780141439587",
+    "descripcion": "La historia de una joven que intenta organizar la vida amorosa de quienes la rodean.",
+    "disponible": true,
+    "portada": "📖"
+  }
+},
+{
+  "model": "api.libro",
+  "pk": 37,
+  "fields": {
+    "titulo": "Crimen y castigo",
+    "autor": 21,
+    "genero": 6,
+    "anio": 1866,
+    "isbn": "9780143058144",
+    "descripcion": "Un estudiante comete un crimen y enfrenta las consecuencias psicológicas.",
+    "disponible": true,
+    "portada": "📖"
+  }
+},
+{
+  "model": "api.libro",
+  "pk": 38,
+  "fields": {
+    "titulo": "El idiota",
+    "autor": 21,
+    "genero": 6,
+    "anio": 1869,
+    "isbn": "9780140447927",
+    "descripcion": "La historia del príncipe Myshkin y su visión bondadosa del mundo.",
+    "disponible": true,
+    "portada": "📖"
+  }
+},
+{
+  "model": "api.libro",
+  "pk": 39,
+  "fields": {
+    "titulo": "El Hobbit",
+    "autor": 22,
+    "genero": 9,
+    "anio": 1937,
+    "isbn": "9780547928227",
+    "descripcion": "Bilbo Bolsón emprende una aventura inesperada junto a un grupo de enanos.",
+    "disponible": true,
+    "portada": "📖"
+  }
+},
+{
+  "model": "api.libro",
+  "pk": 40,
+  "fields": {
+    "titulo": "La comunidad del anillo",
+    "autor": 22,
+    "genero": 9,
+    "anio": 1954,
+    "isbn": "9780261102354",
+    "descripcion": "Primera parte de la trilogía El Señor de los Anillos.",
+    "disponible": true,
+    "portada": "📖"
+  }
+},
+{
+  "model": "api.libro",
+  "pk": 41,
+  "fields": {
+    "titulo": "Las dos torres",
+    "autor": 22,
+    "genero": 9,
+    "anio": 1954,
+    "isbn": "9780261102361",
+    "descripcion": "Segunda parte de la trilogía El Señor de los Anillos.",
+    "disponible": true,
+    "portada": "📖"
+  }
+},
+{
+  "model": "api.libro",
+  "pk": 42,
+  "fields": {
+    "titulo": "El retorno del rey",
+    "autor": 22,
+    "genero": 9,
+    "anio": 1955,
+    "isbn": "9780261102378",
+    "descripcion": "Conclusión épica de la trilogía El Señor de los Anillos.",
     "disponible": true,
     "portada": "📖"
   }
