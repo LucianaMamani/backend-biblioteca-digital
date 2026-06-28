@@ -2,14 +2,14 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg:        #0d0c0b;
-  --bg-card:   #131210;
-  --bg-card2:  #1a1815;
-  --gold:      #c9a84c;
-  --gold-dim:  #8a6e2f;
-  --cream:     #f0e8d8;
-  --muted:     #7a7266;
-  --border:    #2a2620;
+  --bg:        #f5f0e8;
+  --bg-card:   #ede8de;
+  --bg-card2:  #e5dfd3;
+  --gold:      #8a6e2f;
+  --gold-dim:  #c9a84c;
+  --cream:     #1a1610;
+  --muted:     #7a7060;
+  --border:    #d5cdc0;
   --danger:    #c0392b;
   --success:   #5a9e6a;
   --font-head: 'Playfair Display', Georgia, serif;
