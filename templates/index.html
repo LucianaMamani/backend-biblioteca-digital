@@ -82,7 +82,36 @@
 
     /* ── STATS BAR ── */
     .stats-bar { border-top: 1px solid var(--border); background: var(--bg-card); display: grid; grid-template-columns: repeat(3, 1fr); }
-    .stat-item { padding: 2rem 2.5rem; border-right: 1px solid var(--border); display: flex; align-items: center; gap: 1.25rem; }
+    .stat-item{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+     padding:55px 45px;
+     border-right:1px solid #e5ddd2;
+}
+.stat-item:last-child{
+    border-right:none;
+}
+.stat-content{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+}
+.stat-num{
+    display: block;
+    font-family: 'Playfair Display', serif;
+    font-size: 3rem;
+    font-weight: 400; /* más fino */
+    color: #1f1a17;
+    margin: 8px 0;
+}
+.stat-lbl{
+    font-size:.78rem;
+    letter-spacing:3px;
+    text-transform:uppercase;
+    color:#9b7a32;
+}
     .stat-item:last-child { border-right: none; }
     .stat-icon { width: 48px; height: 48px; border-radius: 50%; background: var(--bg-card2); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
     .stat-num { font-family: var(--font-head); font-size: 2rem; color: var(--dark); display: block; line-height: 1; }
@@ -206,31 +235,32 @@
   </section>
 
   <div class="stats-bar">
-    <div class="stat-item">
-      <div class="stat-icon">📚</div>
-      <div>
-        <span class="stat-lbl">Libros disponibles</span>
-        <span class="stat-num">1.200+</span>
-        <p class="stat-desc">Miles de títulos al alcance de tu mano.</p>
-      </div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-icon">✍️</div>
-      <div>
-        <span class="stat-lbl">Géneros y autores</span>
-        <span class="stat-num">80+</span>
-        <p class="stat-desc">Explorá una amplia variedad de obras y escritores.</p>
-      </div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-icon">🌐</div>
-      <div>
-        <span class="stat-lbl">Acceso digital</span>
-        <span class="stat-num">100%</span>
-        <p class="stat-desc">Disponible desde cualquier lugar, en cualquier momento.</p>
-      </div>
+
+  <div class="stat-item">
+    <div class="stat-content">
+      <span class="stat-lbl">LIBROS DISPONIBLES</span>
+      <span class="stat-num">1.200+</span>
+      <p class="stat-desc">Miles de títulos al alcance de tu mano.</p>
     </div>
   </div>
+
+  <div class="stat-item">
+    <div class="stat-content">
+      <span class="stat-lbl">GÉNEROS Y AUTORES</span>
+      <span class="stat-num">80+</span>
+      <p class="stat-desc">Explorá una amplia variedad de obras y escritores.</p>
+    </div>
+  </div>
+
+  <div class="stat-item">
+    <div class="stat-content">
+      <span class="stat-lbl">ACCESO DIGITAL</span>
+      <span class="stat-num">100%</span>
+      <p class="stat-desc">Disponible desde cualquier lugar, en cualquier momento.</p>
+    </div>
+  </div>
+
+</div>
 
   <section class="features">
     <div class="features-top">
