@@ -30,9 +30,13 @@ INSTALLED_APPS = [
     # Terceros
     'rest_framework',
     'corsheaders',
-    # Nuestra app
+
     'api',
+    'libros',
+    'reservas',
+    'usuarios',
 ]
+
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
@@ -106,6 +110,3 @@ import os
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_URL = '/static/'
 
-import os
-STATICFILES_DIRS = [BASE_DIR / 'static']
-STATIC_URL = '/static/'
