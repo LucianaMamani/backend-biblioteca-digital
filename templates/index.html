@@ -141,13 +141,59 @@
     .catalogue-search button { padding: 0.65rem 1.1rem; background: var(--gold); border: 1px solid var(--gold); border-radius: 0 2px 2px 0; cursor: pointer; font-size: 0.85rem; color: #fff; }
     .books-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 1.5rem; }
     .book-card { cursor: pointer; transition: transform .2s; }
-    .book-card:hover { transform: translateY(-4px); }
+    .book-card:hover .book-card-cover {
+    transform: translateY(-6px);
+    border-color: #c6a15a;
+    box-shadow:
+        0 18px 35px rgba(0,0,0,.15),
+        inset 0 1px 0 rgba(255,255,255,.8);
+}
     .book-card:hover .book-card-cover { border-color: var(--gold); }
     .book-card-cover { width: 100%; aspect-ratio: 2/3; border-radius: 2px 6px 6px 2px; margin-bottom: 0.75rem; border: 1px solid #1a1610; background: #0d0c0b; display: flex; align-items: center; justify-content: center; transition: border-color .2s; position: relative; overflow: hidden; }
-    .book-card-cover::after { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 8px; background: rgba(0,0,0,.4); border-radius: 2px 0 0 2px; }
+.book-card-cover {
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    margin-bottom: 0.9rem;
+    border-radius: 12px;
+    overflow: hidden;
+    background: linear-gradient(
+        145deg,
+        #f7f1e6,
+        #ede1cf
+    );
+    border: 1px solid #d8c6a8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all .3s ease;
+    box-shadow:
+        0 8px 18px rgba(0,0,0,.08),
+        inset 0 1px 0 rgba(255,255,255,.7);
+     position: relative;
+}   
+.book-card-cover::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 10px;
+
+    background: linear-gradient(
+        to right,
+        #ccb18a,
+        #e7d8bf
+    );
+
+    border-right: 1px solid rgba(0,0,0,.08);
+}
     .book-card-icon { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
-    .book-card-icon svg { width: 36px; height: 36px; opacity: 0.5; }
-    .book-card-genre { font-size: 0.65rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.2rem; }
+.book-card-icon svg {
+    width: 42px;
+    height: 42px;
+    color: #b18a45;
+    opacity: .65;
+}    .book-card-genre { font-size: 0.65rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.2rem; }
     .book-card-title { font-family: var(--font-head); font-size: 0.9rem; line-height: 1.3; margin-bottom: 0.2rem; color: var(--dark); }
     .book-card-author { font-size: 0.75rem; color: var(--muted); }
     .available-badge { display: inline-block; margin-top: 0.4rem; font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.2rem 0.5rem; border-radius: 2px; background: rgba(90,140,80,0.1); color: #5a8c50; border: 1px solid rgba(90,140,80,0.25); }
@@ -156,7 +202,15 @@
 
     .generos { background: var(--bg-card); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
     .generos-intro { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 3rem; gap: 2rem; flex-wrap: wrap; }
-    .generos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; }
+.generos-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+}
     .genero-card { background: var(--bg); padding: 1.75rem 1.5rem; cursor: pointer; transition: background .2s; display: flex; flex-direction: column; gap: 0.4rem; position: relative; }
     .genero-card::after { content: '→'; position: absolute; right: 1.25rem; bottom: 1.25rem; font-size: 0.85rem; color: var(--border); transition: color .2s, transform .2s; }
     .genero-card:hover { background: var(--bg-card2); }
@@ -307,7 +361,7 @@
       </div>
       <div class="catalogue-search">
         <input type="text" placeholder="Buscar por título o autor…"/>
-        <button>🔍</button>
+        <button>⌕</button>
       </div>
     </div>
     <div class="books-grid">
