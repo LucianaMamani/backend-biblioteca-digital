@@ -11,7 +11,7 @@ async function renderNav(activeLink = '') {
 
   const links = [
     { href: '../pages/catalogo.html', label: 'Catálogo', key: 'catalogo' },
-    { href: '../pages/catalogo.html#generos', label: 'Géneros', key: 'generos' },
+    { href: '/#generos', label: 'Géneros', key: 'generos' },
   ];
 
   const linksHTML = links.map(l =>
