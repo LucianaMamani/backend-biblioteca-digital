@@ -15,8 +15,9 @@ class UsuarioViewSet(viewsets.ModelViewSet):
 
 class RegisterView(viewsets.GenericViewSet):
     permission_classes = [permissions.AllowAny]
+    authentication_classes = []
     serializer_class = RegisterSerializer
-
+    
     @action(detail=False, methods=['post'])
     def register(self, request):
         serializer = RegisterSerializer(data=request.data)
